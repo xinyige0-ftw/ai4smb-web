@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import GenerateWizard from "@/components/GenerateWizard";
+import AuthButton from "@/components/AuthButtonWrapper";
 
 export const metadata: Metadata = {
   title: "AI Campaign Generator — AI4SMB Insights",
@@ -16,7 +17,7 @@ export default function GeneratePage() {
           </a>
           <div className="flex items-center gap-4">
             <a href="/history" className="text-xs text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200">History</a>
-            <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900 dark:text-blue-200">Free</span>
+            <AuthButton />
           </div>
         </div>
       </div>

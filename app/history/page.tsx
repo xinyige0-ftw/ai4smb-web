@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import HistoryView from "@/components/HistoryView";
+import AuthButton from "@/components/AuthButtonWrapper";
 
 export const metadata: Metadata = {
   title: "Your History — AI4SMB Insights",
@@ -15,8 +16,9 @@ export default function HistoryPage() {
             AI4SMB Insights
           </a>
           <div className="flex items-center gap-4">
-            <a href="/segment" className="text-sm text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200">Segments</a>
-            <a href="/generate" className="text-sm text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200">Campaigns</a>
+            <a href="/segment" className="text-xs text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200">Segments</a>
+            <a href="/generate" className="text-xs text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200">Campaigns</a>
+            <AuthButton />
           </div>
         </div>
       </div>

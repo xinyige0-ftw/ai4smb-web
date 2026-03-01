@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import SegmentWizard from "@/components/SegmentWizard";
+import SegmentRouter from "@/components/SegmentRouter";
 
 export const metadata: Metadata = {
-  title: "Audience Segmentation — AI4SMB Insights",
-  description: "Upload your customer data and let AI find your most valuable audience segments.",
+  title: "Customer Segments — AI4SMB Insights",
+  description: "Understand your customers with AI. Upload data, answer questions, analyze reviews, or get instant industry benchmarks.",
 };
 
 export default function SegmentPage() {
@@ -19,7 +19,7 @@ export default function SegmentPage() {
           </span>
         </div>
       </div>
-      <SegmentWizard />
+      <SegmentRouter />
     </main>
   );
 }

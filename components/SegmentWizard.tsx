@@ -21,7 +21,7 @@ interface SegmentData {
   dataQuality: string;
 }
 
-export default function SegmentWizard() {
+export default function SegmentWizard({ onBack }: { onBack?: () => void } = {}) {
   const [step, setStep] = useState<"upload" | "preview" | "results">("upload");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -140,7 +140,7 @@ export default function SegmentWizard() {
       <SegmentResults
         result={result}
         meta={meta}
-        onStartOver={handleStartOver}
+        onStartOver={onBack || handleStartOver}
         onReanalyze={handleAnalyze}
         loading={loading}
       />
@@ -152,8 +152,13 @@ export default function SegmentWizard() {
       {/* Upload step */}
       {step === "upload" && (
         <div>
+          {onBack && (
+            <button onClick={onBack} className="mb-4 flex items-center gap-1 text-sm text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300">
+              ← All analysis methods
+            </button>
+          )}
           <h1 className="mb-2 text-center text-2xl font-bold text-zinc-900 dark:text-zinc-50">
-            Understand Your Customers
+            Upload Customer Data
           </h1>
           <p className="mb-8 text-center text-zinc-500 dark:text-zinc-400">
             Upload a CSV of your customer data and AI will find your audience segments

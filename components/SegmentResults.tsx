@@ -22,6 +22,7 @@ interface SegmentData {
 interface SegmentResultsProps {
   result: SegmentData;
   meta: { rowCount: number; columnCount: number };
+  metaLabel?: string;
   onStartOver: () => void;
   onReanalyze: () => void;
   loading: boolean;
@@ -103,18 +104,25 @@ function SegmentCard({ segment }: { segment: Segment }) {
 export default function SegmentResults({
   result,
   meta,
+  metaLabel,
   onStartOver,
   onReanalyze,
   loading,
 }: SegmentResultsProps) {
+  const metaText =
+    metaLabel ||
+    (meta.rowCount > 0
+      ? `${meta.rowCount} customers analyzed across ${meta.columnCount} data points`
+      : null);
+
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-8">
       <h1 className="mb-2 text-center text-2xl font-bold text-zinc-900 dark:text-zinc-50">
         Your Audience Segments
       </h1>
-      <p className="mb-1 text-center text-zinc-500 dark:text-zinc-400">
-        {meta.rowCount} customers analyzed across {meta.columnCount} data points
-      </p>
+      {metaText && (
+        <p className="mb-1 text-center text-zinc-500 dark:text-zinc-400">{metaText}</p>
+      )}
 
       {/* Summary */}
       <div className="my-6 rounded-xl border border-blue-200 bg-blue-50 p-5 dark:border-blue-800 dark:bg-blue-950">
@@ -208,7 +216,7 @@ export default function SegmentResults({
           onClick={onStartOver}
           className="rounded-lg border border-zinc-300 px-5 py-3 text-sm font-medium text-zinc-600 transition-all hover:bg-zinc-50 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
         >
-          Upload new data
+          Try another method
         </button>
       </div>
     </div>

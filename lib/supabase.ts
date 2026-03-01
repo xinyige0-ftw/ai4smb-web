@@ -125,3 +125,18 @@ export async function getHistory(anonId: string) {
 
   return { campaigns: campaigns ?? [], segments: segments ?? [] };
 }
+
+// ─── HEALTH CHECK (for /api/health) ─────────────────────────────────
+
+export async function checkSupabaseConnection(): Promise<{
+  ok: boolean;
+  error?: string;
+  sessionsCount?: number;
+}> {
+  const db = getClient();
+  if (!db) return { ok: false, error: "Supabase not configured" };
+
+  const { count, error } = await db.from("sessions").select("id", { count: "exact", head: true });
+  if (error) return { ok: false, error: error.message };
+  return { ok: true, sessionsCount: count ?? 0 };
+}

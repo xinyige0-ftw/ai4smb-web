@@ -1,5 +1,6 @@
 import Groq from "groq-sdk";
 import { buildPrompt, SYSTEM_PROMPT, type GenerateInput } from "@/lib/prompts";
+import { getOrCreateSession, saveCampaign } from "@/lib/supabase";
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY || "" });
 
@@ -53,10 +54,23 @@ export async function POST(req: Request) {
       anonId: anonId || "unknown",
       businessType: input.businessType,
       goal: input.goal,
-      budget: input.budget,
-      channels: input.channels,
-      generatedChannels: campaign.channels?.map((c: { channel: string }) => c.channel),
+      channels: campaign.channels?.map((c: { channel: string }) => c.channel),
     });
+
+    // Save to DB (non-blocking — don't fail the response if this errors)
+    if (anonId && anonId !== "unknown") {
+      getOrCreateSession(anonId).then((sessionId) =>
+        saveCampaign({
+          session_id: sessionId,
+          business_type: input.businessType,
+          business_name: input.businessName,
+          goal: input.goal,
+          budget: input.budget,
+          channels: input.channels,
+          result: campaign,
+        })
+      ).catch(() => {});
+    }
 
     return Response.json({ campaign });
   } catch (err) {

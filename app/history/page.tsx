@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import GenerateWizard from "@/components/GenerateWizard";
+import HistoryView from "@/components/HistoryView";
 
 export const metadata: Metadata = {
-  title: "AI Campaign Generator — AI4SMB Insights",
-  description: "Create a personalized marketing campaign for your small business in seconds with AI.",
+  title: "Your History — AI4SMB Insights",
+  description: "Review your past campaigns and customer segment analyses.",
 };
 
-export default function GeneratePage() {
+export default function HistoryPage() {
   return (
     <main className="min-h-screen bg-zinc-50 dark:bg-black">
       <div className="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
@@ -15,12 +15,12 @@ export default function GeneratePage() {
             AI4SMB Insights
           </a>
           <div className="flex items-center gap-4">
-            <a href="/history" className="text-xs text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200">History</a>
-            <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900 dark:text-blue-200">Free</span>
+            <a href="/segment" className="text-sm text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200">Segments</a>
+            <a href="/generate" className="text-sm text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200">Campaigns</a>
           </div>
         </div>
       </div>
-      <GenerateWizard />
+      <HistoryView />
     </main>
   );
 }

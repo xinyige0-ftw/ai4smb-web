@@ -14,9 +14,10 @@ export default function SegmentPage() {
           <a href="/" className="text-sm font-bold text-zinc-900 dark:text-zinc-50">
             AI4SMB Insights
           </a>
-          <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900 dark:text-blue-200">
-            Free
-          </span>
+          <div className="flex items-center gap-4">
+            <a href="/history" className="text-xs text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200">History</a>
+            <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900 dark:text-blue-200">Free</span>
+          </div>
         </div>
       </div>
       <SegmentRouter />

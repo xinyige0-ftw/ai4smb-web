@@ -1,5 +1,6 @@
 import Groq from "groq-sdk";
 import { buildSegmentPrompt, SEGMENT_SYSTEM_PROMPT, type CsvSummary } from "@/lib/segment-prompts";
+import { getOrCreateSession, saveSegment } from "@/lib/supabase";
 import {
   buildInterviewPrompt,
   buildBenchmarkPrompt,
@@ -135,6 +136,19 @@ export async function POST(req: Request) {
       mode,
       segmentCount: result.segments?.length,
     });
+
+    // Save to DB (non-blocking)
+    if (anonId && anonId !== "unknown") {
+      const metaLabel = body.metaLabel as string | undefined;
+      getOrCreateSession(anonId).then((sessionId) =>
+        saveSegment({
+          session_id: sessionId,
+          mode,
+          result,
+          meta_label: metaLabel,
+        })
+      ).catch(() => {});
+    }
 
     return Response.json({
       result,

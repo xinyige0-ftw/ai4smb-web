@@ -20,7 +20,7 @@ export default async function SharePage({ params }: { params: Promise<{ id: stri
 
   let type: "campaign" | "segment" = "campaign";
   let result: unknown = null;
-  let meta: Record<string, unknown> = {};
+  let meta: Record<string, string> = {};
 
   const { data: campaign } = await db
     .from("campaigns")
@@ -81,7 +81,7 @@ export default async function SharePage({ params }: { params: Promise<{ id: stri
   );
 }
 
-function SharedResultView({ type, result, meta }: { type: string; result: unknown; meta: Record<string, unknown> }) {
+function SharedResultView({ type, result, meta }: { type: string; result: unknown; meta: Record<string, string> }) {
   const data = result as Record<string, unknown>;
 
   if (type === "campaign") {
@@ -95,7 +95,7 @@ function SharedResultView({ type, result, meta }: { type: string; result: unknow
         </h1>
         {meta.businessName && (
           <p className="mb-4 text-center text-sm text-zinc-500">
-            For {meta.businessName as string} ({meta.businessType as string})
+            For {meta.businessName} ({meta.businessType})
           </p>
         )}
 
@@ -136,7 +136,7 @@ function SharedResultView({ type, result, meta }: { type: string; result: unknow
         Customer Segments
       </h1>
       {meta.metaLabel && (
-        <p className="mb-4 text-center text-sm text-zinc-500">{meta.metaLabel as string}</p>
+        <p className="mb-4 text-center text-sm text-zinc-500">{meta.metaLabel}</p>
       )}
 
       {summary && (

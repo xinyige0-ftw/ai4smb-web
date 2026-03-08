@@ -39,7 +39,8 @@ export default function CampaignChat({
   const [hasSpeechSupport, setHasSpeechSupport] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
     const supported =
@@ -117,17 +118,8 @@ export default function CampaignChat({
       return;
     }
 
-    const SR =
-      (
-        window as unknown as {
-          SpeechRecognition?: typeof SpeechRecognition;
-        }
-      ).SpeechRecognition ||
-      (
-        window as unknown as {
-          webkitSpeechRecognition?: typeof SpeechRecognition;
-        }
-      ).webkitSpeechRecognition;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
     if (!SR) return;
 
@@ -136,7 +128,8 @@ export default function CampaignChat({
     recognition.interimResults = false;
     recognition.lang = document.documentElement.lang || "en-US";
 
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    recognition.onresult = (event: any) => {
       const transcript = event.results[0]?.[0]?.transcript;
       if (transcript) {
         setInput((prev) => prev + (prev ? " " : "") + transcript);

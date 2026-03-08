@@ -1,3 +1,7 @@
+import TestimonialCarousel from "@/components/TestimonialCarousel";
+import AuthButtonWrapper from "@/components/AuthButtonWrapper";
+import LanguageToggle from "@/components/LanguageToggle";
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-white dark:bg-black">
@@ -7,9 +11,13 @@ export default function Home() {
           <span className="text-base font-bold text-zinc-900 dark:text-zinc-50">
             AI4SMB Insights
           </span>
-          <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700 dark:bg-green-900 dark:text-green-300">
-            100% Free
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700 dark:bg-green-900 dark:text-green-300">
+              100% Free
+            </span>
+            <LanguageToggle />
+            <AuthButtonWrapper />
+          </div>
         </div>
       </nav>
 
@@ -179,6 +187,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Testimonials */}
+      <TestimonialCarousel />
 
       {/* Bottom CTA */}
       <section className="border-t border-zinc-100 bg-blue-600 px-4 py-16 text-center dark:border-zinc-800">

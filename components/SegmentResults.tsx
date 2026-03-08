@@ -1,7 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { formatSegmentReport, downloadText, copyText } from "@/lib/export";
+
+interface ChannelRec {
+  channel: string;
+  fit: "high" | "medium";
+  reason: string;
+}
+
+interface AvoidChannel {
+  channel: string;
+  reason: string;
+}
 
 interface Segment {
   name: string;
@@ -11,6 +23,15 @@ interface Segment {
   characteristics: string[];
   size: number;
   recommendations: string[];
+  propensityScore?: "high" | "medium" | "low";
+  lifetimeValueTier?: "high" | "medium" | "low";
+  intent?: string;
+  bestChannels?: ChannelRec[];
+  avoidChannels?: AvoidChannel[];
+  messagingAngle?: string;
+  offerSuggestion?: string;
+  toneGuidance?: string;
+  reasoning?: string;
 }
 
 interface SegmentData {
@@ -22,6 +43,7 @@ interface SegmentData {
 
 interface SegmentResultsProps {
   result: SegmentData;
+  resultId?: string | null;
   meta: { rowCount: number; columnCount: number };
   metaLabel?: string;
   onStartOver: () => void;
@@ -42,22 +64,59 @@ function getColor(color: string) {
   return COLOR_MAP[color] || COLOR_MAP.blue;
 }
 
+const TIER_COLORS: Record<string, string> = {
+  high: "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300",
+  medium: "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300",
+  low: "bg-rose-100 text-rose-700 dark:bg-rose-900 dark:text-rose-300",
+};
+
+function TierBadge({ label, value }: { label: string; value?: string }) {
+  if (!value) return null;
+  return (
+    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${TIER_COLORS[value] || TIER_COLORS.medium}`}>
+      {label}: {value}
+    </span>
+  );
+}
+
 function SegmentCard({ segment }: { segment: Segment }) {
-  const [expanded, setExpanded] = useState(false);
+  const [recsExpanded, setRecsExpanded] = useState(false);
+  const [reasoningExpanded, setReasoningExpanded] = useState(false);
+  const router = useRouter();
   const c = getColor(segment.color);
+
+  function handleCampaign() {
+    const prefill = {
+      channels: segment.bestChannels?.map((ch) => ch.channel) ?? [],
+      tone: segment.toneGuidance ?? "",
+      details: [segment.messagingAngle, segment.offerSuggestion].filter(Boolean).join(" — "),
+    };
+    const encoded = encodeURIComponent(JSON.stringify(prefill));
+    router.push(`/generate?prefill=1&segment=${encoded}`);
+  }
 
   return (
     <div className={`rounded-xl border ${c.border} ${c.bg} p-5`}>
+      {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <h3 className={`text-lg font-bold ${c.text}`}>{segment.name}</h3>
+          {segment.intent && (
+            <p className="mt-0.5 text-xs font-medium text-zinc-500 dark:text-zinc-400 italic">
+              {segment.intent}
+            </p>
+          )}
           <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
             {segment.description}
           </p>
         </div>
-        <div className="ml-4 text-right">
+        <div className="ml-4 flex flex-col items-end gap-1">
           <div className={`text-2xl font-bold ${c.text}`}>{segment.percentage}%</div>
           <div className="text-xs text-zinc-500 dark:text-zinc-400">~{segment.size} customers</div>
+          <div className="flex gap-1">
+            <TierBadge label="Propensity" value={segment.propensityScore} />
+            <TierBadge label="LTV" value={segment.lifetimeValueTier} />
+          </div>
         </div>
       </div>
 
@@ -81,14 +140,75 @@ function SegmentCard({ segment }: { segment: Segment }) {
         ))}
       </div>
 
+      {/* Where to reach them */}
+      {(segment.bestChannels?.length || segment.avoidChannels?.length) && (
+        <div className="mt-4">
+          <h4 className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            Where to reach them
+          </h4>
+          {segment.bestChannels && segment.bestChannels.length > 0 && (
+            <div className="mt-2 space-y-1.5">
+              {segment.bestChannels.map((ch, i) => (
+                <div key={i} className="flex items-start gap-2 text-sm">
+                  <span
+                    className={`mt-0.5 shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
+                      ch.fit === "high"
+                        ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+                        : "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300"
+                    }`}
+                  >
+                    {ch.fit}
+                  </span>
+                  <span className="font-medium text-zinc-800 dark:text-zinc-200">{ch.channel}</span>
+                  <span className="text-zinc-500 dark:text-zinc-400">— {ch.reason}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          {segment.avoidChannels && segment.avoidChannels.length > 0 && (
+            <div className="mt-2 space-y-1.5">
+              {segment.avoidChannels.map((ch, i) => (
+                <div key={i} className="flex items-start gap-2 text-sm">
+                  <span className="mt-0.5 shrink-0 rounded-full bg-rose-100 px-1.5 py-0.5 text-[10px] font-bold text-rose-700 dark:bg-rose-900 dark:text-rose-300">
+                    avoid
+                  </span>
+                  <span className="font-medium text-zinc-800 dark:text-zinc-200">{ch.channel}</span>
+                  <span className="text-zinc-500 dark:text-zinc-400">— {ch.reason}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* What to tell them */}
+      {(segment.messagingAngle || segment.offerSuggestion || segment.toneGuidance) && (
+        <div className="mt-4">
+          <h4 className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            What to tell them
+          </h4>
+          <div className="mt-2 space-y-1.5 text-sm text-zinc-700 dark:text-zinc-300">
+            {segment.messagingAngle && (
+              <p><span className="font-semibold">Message:</span> {segment.messagingAngle}</p>
+            )}
+            {segment.offerSuggestion && (
+              <p><span className="font-semibold">Offer idea:</span> {segment.offerSuggestion}</p>
+            )}
+            {segment.toneGuidance && (
+              <p><span className="font-semibold">Tone:</span> {segment.toneGuidance}</p>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Recommendations (expandable) */}
       <button
-        onClick={() => setExpanded(!expanded)}
+        onClick={() => setRecsExpanded(!recsExpanded)}
         className={`mt-3 text-xs font-semibold ${c.text}`}
       >
-        {expanded ? "Hide recommendations ▲" : `${segment.recommendations.length} recommendations ▼`}
+        {recsExpanded ? "Hide recommendations ▲" : `${segment.recommendations.length} recommendations ▼`}
       </button>
-      {expanded && (
+      {recsExpanded && (
         <ul className="mt-2 space-y-1.5">
           {segment.recommendations.map((rec, i) => (
             <li key={i} className="flex items-start gap-2 text-sm text-zinc-700 dark:text-zinc-300">
@@ -98,12 +218,40 @@ function SegmentCard({ segment }: { segment: Segment }) {
           ))}
         </ul>
       )}
+
+      {/* Why this recommendation? (expandable) */}
+      {segment.reasoning && (
+        <>
+          <button
+            onClick={() => setReasoningExpanded(!reasoningExpanded)}
+            className={`mt-2 text-xs font-semibold ${c.text}`}
+          >
+            {reasoningExpanded ? "Hide reasoning ▲" : "Why this recommendation? ▼"}
+          </button>
+          {reasoningExpanded && (
+            <p className="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+              {segment.reasoning}
+            </p>
+          )}
+        </>
+      )}
+
+      {/* Campaign button */}
+      {(segment.bestChannels?.length || segment.messagingAngle) && (
+        <button
+          onClick={handleCampaign}
+          className="mt-4 w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+        >
+          Turn this into a campaign →
+        </button>
+      )}
     </div>
   );
 }
 
 export default function SegmentResults({
   result,
+  resultId,
   meta,
   metaLabel,
   onStartOver,
@@ -111,6 +259,7 @@ export default function SegmentResults({
   loading,
 }: SegmentResultsProps) {
   const [copied, setCopied] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
 
   function handleDownload() {
     const text = formatSegmentReport(result, metaLabel);
@@ -122,6 +271,14 @@ export default function SegmentResults({
     await copyText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
+  }
+
+  async function handleShare() {
+    if (!resultId) return;
+    const url = window.location.origin + "/share/" + resultId;
+    await navigator.clipboard.writeText(url);
+    setShareCopied(true);
+    setTimeout(() => setShareCopied(false), 3000);
   }
 
   const metaText =
@@ -239,6 +396,14 @@ export default function SegmentResults({
         >
           {copied ? "✓ Copied!" : "📋 Copy all"}
         </button>
+        {resultId && (
+          <button
+            onClick={handleShare}
+            className="rounded-lg border border-zinc-300 px-5 py-3 text-sm font-medium text-zinc-600 transition-all hover:bg-zinc-50 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
+          >
+            {shareCopied ? "✓ Link copied!" : "🔗 Share"}
+          </button>
+        )}
         <button
           onClick={onStartOver}
           className="rounded-lg px-5 py-3 text-sm font-medium text-zinc-400 transition-all hover:text-zinc-600 dark:hover:text-zinc-300"

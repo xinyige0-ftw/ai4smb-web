@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import ChannelCard from "./ChannelCard";
+import PostAgent from "./PostAgent";
 import { formatCampaignReport, downloadText, copyText } from "@/lib/export";
 
 interface CampaignData {
@@ -11,10 +12,12 @@ interface CampaignData {
     why: string;
     content: Record<string, unknown>;
   }[];
+  thisWeek?: { day: string; action: string; why: string }[];
 }
 
 interface CampaignResultsProps {
   campaign: CampaignData;
+  campaignId?: string | null;
   onRegenerate: () => void;
   onStartOver: () => void;
   onAdjust: () => void;
@@ -23,12 +26,14 @@ interface CampaignResultsProps {
 
 export default function CampaignResults({
   campaign,
+  campaignId,
   onRegenerate,
   onStartOver,
   onAdjust,
   loading,
 }: CampaignResultsProps) {
   const [copied, setCopied] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
 
   function handleDownload() {
     downloadText(formatCampaignReport(campaign), "marketing-campaign.txt");
@@ -38,6 +43,14 @@ export default function CampaignResults({
     await copyText(formatCampaignReport(campaign));
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
+  }
+
+  async function handleShare() {
+    if (!campaignId) return;
+    const url = window.location.origin + "/share/" + campaignId;
+    await navigator.clipboard.writeText(url);
+    setShareCopied(true);
+    setTimeout(() => setShareCopied(false), 3000);
   }
 
   return (
@@ -71,6 +84,28 @@ export default function CampaignResults({
         ))}
       </div>
 
+      {/* This Week's Action Plan */}
+      {campaign.thisWeek && campaign.thisWeek.length > 0 && (
+        <div className="mt-6 rounded-xl border border-green-200 bg-green-50 p-5 dark:border-green-800 dark:bg-green-950">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-green-700 dark:text-green-300">
+            This Week&apos;s Action Plan
+          </h2>
+          <div className="space-y-3">
+            {campaign.thisWeek.map((item, i) => (
+              <div key={i} className="flex items-start gap-3">
+                <span className="shrink-0 rounded-lg bg-green-100 px-2 py-1 text-xs font-bold text-green-700 dark:bg-green-900 dark:text-green-300">
+                  {item.day}
+                </span>
+                <div>
+                  <p className="text-sm font-medium text-green-900 dark:text-green-100">{item.action}</p>
+                  <p className="text-xs text-green-600 dark:text-green-400">{item.why}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Actions */}
       <div className="mt-8 flex flex-col gap-3 sm:flex-row">
         <button
@@ -99,6 +134,14 @@ export default function CampaignResults({
         >
           {copied ? "✓ Copied!" : "📋 Copy all"}
         </button>
+        {campaignId && (
+          <button
+            onClick={handleShare}
+            className="rounded-lg border border-zinc-300 px-5 py-3 text-sm font-medium text-zinc-600 transition-all hover:bg-zinc-50 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
+          >
+            {shareCopied ? "✓ Link copied!" : "🔗 Share"}
+          </button>
+        )}
         <button
           onClick={onAdjust}
           className="rounded-lg border border-zinc-300 px-5 py-3 text-sm font-medium text-zinc-600 transition-all hover:bg-zinc-50 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
@@ -112,6 +155,8 @@ export default function CampaignResults({
           Start over
         </button>
       </div>
+
+      <PostAgent channels={campaign.channels} />
     </div>
   );
 }

@@ -18,6 +18,7 @@ export default function GenerateWizard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [campaign, setCampaign] = useState<CampaignData | null>(null);
+  const [campaignId, setCampaignId] = useState<string | null>(null);
 
   const [businessType, setBusinessType] = useState("");
   const [businessTypeCustom, setBusinessTypeCustom] = useState("");
@@ -47,6 +48,7 @@ export default function GenerateWizard() {
     setLoading(true);
     setError("");
     setCampaign(null);
+    setCampaignId(null);
 
     const input: GenerateInput = {
       businessType,
@@ -76,6 +78,7 @@ export default function GenerateWizard() {
         return;
       }
       setCampaign(data.campaign);
+      setCampaignId(data.id || null);
       setStep(3);
     } catch {
       setError("Network error. Please try again.");
@@ -88,10 +91,12 @@ export default function GenerateWizard() {
     return (
       <CampaignResults
         campaign={campaign}
+        campaignId={campaignId}
         onRegenerate={handleGenerate}
         onStartOver={() => {
           setStep(1);
           setCampaign(null);
+          setCampaignId(null);
           setBusinessType("");
           setBusinessTypeCustom("");
           setBusinessName("");

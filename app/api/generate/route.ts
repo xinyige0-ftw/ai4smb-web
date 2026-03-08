@@ -1,28 +1,21 @@
 import Groq from "groq-sdk";
-import { buildPrompt, SYSTEM_PROMPT, type GenerateInput } from "@/lib/prompts";
+import { buildPrompt, getSystemPrompt, type GenerateInput } from "@/lib/prompts";
 import { getOrCreateSession, saveCampaign } from "@/lib/supabase";
+import { getUser } from "@/lib/auth";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY || "" });
-
-const RATE_LIMIT_MAP = new Map<string, { count: number; resetAt: number }>();
-const MAX_PER_HOUR = 10;
-
-function checkRateLimit(anonId: string): boolean {
-  const now = Date.now();
-  const entry = RATE_LIMIT_MAP.get(anonId);
-  if (!entry || now > entry.resetAt) {
-    RATE_LIMIT_MAP.set(anonId, { count: 1, resetAt: now + 3600_000 });
-    return true;
-  }
-  if (entry.count >= MAX_PER_HOUR) return false;
-  entry.count++;
-  return true;
-}
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { anonId, input } = body as { anonId?: string; input?: GenerateInput };
+    const { anonId, input, locale } = body as { anonId?: string; input?: GenerateInput; locale?: string };
+
+    let userId: string | undefined;
+    try {
+      const user = await getUser();
+      if (user) userId = user.id;
+    } catch {}
 
     if (!input?.businessType || !input?.goal) {
       return Response.json({ error: "Missing required fields" }, { status: 400 });
@@ -35,11 +28,11 @@ export async function POST(req: Request) {
       );
     }
 
-    const prompt = buildPrompt(input);
+    const prompt = buildPrompt(input, locale);
     const completion = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
       messages: [
-        { role: "system", content: SYSTEM_PROMPT },
+        { role: "system", content: getSystemPrompt(locale) },
         { role: "user", content: prompt },
       ],
       temperature: 0.9,
@@ -57,10 +50,11 @@ export async function POST(req: Request) {
       channels: campaign.channels?.map((c: { channel: string }) => c.channel),
     });
 
-    // Save to DB (non-blocking — don't fail the response if this errors)
+    let savedId: string | null = null;
     if (anonId && anonId !== "unknown") {
-      getOrCreateSession(anonId).then((sessionId) =>
-        saveCampaign({
+      try {
+        const sessionId = await getOrCreateSession(anonId, userId);
+        savedId = await saveCampaign({
           session_id: sessionId,
           business_type: input.businessType,
           business_name: input.businessName,
@@ -68,11 +62,11 @@ export async function POST(req: Request) {
           budget: input.budget,
           channels: input.channels,
           result: campaign,
-        })
-      ).catch(() => {});
+        });
+      } catch {}
     }
 
-    return Response.json({ campaign });
+    return Response.json({ campaign, id: savedId });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error("Generate error:", message);

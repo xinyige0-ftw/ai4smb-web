@@ -34,6 +34,7 @@ export default function SegmentWizard({ onBack }: { onBack?: () => void } = {}) 
   const [businessContext, setBusinessContext] = useState("");
 
   const [result, setResult] = useState<SegmentData | null>(null);
+  const [resultId, setResultId] = useState<string | null>(null);
   const [meta, setMeta] = useState({ rowCount: 0, columnCount: 0 });
 
   const parseCsv = useCallback((file: File) => {
@@ -93,6 +94,7 @@ export default function SegmentWizard({ onBack }: { onBack?: () => void } = {}) 
     setLoading(true);
     setError("");
     setResult(null);
+    setResultId(null);
 
     try {
       const anonId =
@@ -115,6 +117,7 @@ export default function SegmentWizard({ onBack }: { onBack?: () => void } = {}) 
         return;
       }
       setResult(data.result);
+      setResultId(data.id || null);
       setMeta(data.meta);
       setStep("results");
     } catch {
@@ -131,6 +134,7 @@ export default function SegmentWizard({ onBack }: { onBack?: () => void } = {}) 
     setFileName("");
     setBusinessContext("");
     setResult(null);
+    setResultId(null);
     setError("");
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
@@ -139,6 +143,7 @@ export default function SegmentWizard({ onBack }: { onBack?: () => void } = {}) 
     return (
       <SegmentResults
         result={result}
+        resultId={resultId}
         meta={meta}
         onStartOver={onBack || handleStartOver}
         onReanalyze={handleAnalyze}

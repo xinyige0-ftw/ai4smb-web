@@ -20,6 +20,7 @@ export default function TeachMeMode({ onBack }: { onBack: () => void }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<SegmentData | null>(null);
+  const [resultId, setResultId] = useState<string | null>(null);
 
   const currentAnswer = answers[currentQ] || "";
   const isLastQuestion = currentQ === TEACH_ME_QUESTIONS.length - 1;
@@ -70,6 +71,7 @@ export default function TeachMeMode({ onBack }: { onBack: () => void }) {
       const data = await res.json();
       if (!res.ok) { setError(data.error || "Something went wrong."); return; }
       setResult(data.result);
+      setResultId(data.id || null);
     } catch {
       setError("Network error. Please try again.");
     } finally {
@@ -81,6 +83,7 @@ export default function TeachMeMode({ onBack }: { onBack: () => void }) {
     return (
       <SegmentResults
         result={result}
+        resultId={resultId}
         meta={{ rowCount: 0, columnCount: 0 }}
         metaLabel="Based on your guided consultation answers"
         onStartOver={onBack}

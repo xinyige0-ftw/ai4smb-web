@@ -14,16 +14,21 @@ function getClient(): SupabaseClient | null {
 
 // ─── SESSION HELPERS ──────────────────────────────────────────────
 
-export async function getOrCreateSession(anonId: string): Promise<string | null> {
+export async function getOrCreateSession(anonId: string, userId?: string): Promise<string | null> {
   const db = getClient();
   if (!db || !anonId || anonId === "unknown") return null;
 
+  const upsertData: Record<string, string> = {
+    anon_id: anonId,
+    last_seen_at: new Date().toISOString(),
+  };
+  if (userId) {
+    upsertData.user_id = userId;
+  }
+
   const { data, error } = await db
     .from("sessions")
-    .upsert(
-      { anon_id: anonId, last_seen_at: new Date().toISOString() },
-      { onConflict: "anon_id" }
-    )
+    .upsert(upsertData, { onConflict: "anon_id" })
     .select("id")
     .single();
 
@@ -119,6 +124,39 @@ export async function getHistory(anonId: string) {
       .from("segments")
       .select("id, name, mode, meta_label, created_at, result")
       .eq("session_id", sessionId)
+      .order("created_at", { ascending: false })
+      .limit(20),
+  ]);
+
+  return { campaigns: campaigns ?? [], segments: segments ?? [] };
+}
+
+// ─── HISTORY BY USER ─────────────────────────────────────────────────
+
+export async function getHistoryByUserId(userId: string) {
+  const db = getClient();
+  if (!db || !userId) return { campaigns: [], segments: [] };
+
+  const { data: sessions } = await db
+    .from("sessions")
+    .select("id")
+    .eq("user_id", userId);
+
+  if (!sessions || sessions.length === 0) return { campaigns: [], segments: [] };
+
+  const sessionIds = sessions.map((s) => s.id);
+
+  const [{ data: campaigns }, { data: segments }] = await Promise.all([
+    db
+      .from("campaigns")
+      .select("id, name, business_type, business_name, goal, created_at, result")
+      .in("session_id", sessionIds)
+      .order("created_at", { ascending: false })
+      .limit(20),
+    db
+      .from("segments")
+      .select("id, name, mode, meta_label, created_at, result")
+      .in("session_id", sessionIds)
       .order("created_at", { ascending: false })
       .limit(20),
   ]);

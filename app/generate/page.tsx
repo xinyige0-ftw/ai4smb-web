@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import GenerateWizard from "@/components/GenerateWizard";
 import AuthButton from "@/components/AuthButtonWrapper";
+import GeneratePageClient from "@/components/GeneratePageClient";
 
 export const metadata: Metadata = {
   title: "AI Campaign Generator — AI4SMB Insights",
@@ -21,7 +21,7 @@ export default function GeneratePage() {
           </div>
         </div>
       </div>
-      <GenerateWizard />
+      <GeneratePageClient />
     </main>
   );
 }

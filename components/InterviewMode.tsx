@@ -29,6 +29,7 @@ export default function InterviewMode({ onBack }: InterviewModeProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<SegmentData | null>(null);
+  const [resultId, setResultId] = useState<string | null>(null);
 
   const [businessType, setBusinessType] = useState("");
   const [businessTypeCustom, setBusinessTypeCustom] = useState("");
@@ -74,6 +75,7 @@ export default function InterviewMode({ onBack }: InterviewModeProps) {
       const data = await res.json();
       if (!res.ok) { setError(data.error || "Something went wrong."); return; }
       setResult(data.result);
+      setResultId(data.id || null);
     } catch {
       setError("Network error. Please try again.");
     } finally {
@@ -85,6 +87,7 @@ export default function InterviewMode({ onBack }: InterviewModeProps) {
     return (
       <SegmentResults
         result={result}
+        resultId={resultId}
         meta={{ rowCount: 0, columnCount: 0 }}
         metaLabel="Based on your knowledge of your customers"
         onStartOver={onBack}

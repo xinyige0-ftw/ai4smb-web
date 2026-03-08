@@ -1,6 +1,16 @@
 "use client";
 
-type Mode = "csv" | "interview" | "benchmark" | "reviews" | "pos" | "social" | "teachme";
+export type Mode =
+  | "ask"
+  | "data"
+  | "text"
+  | "teachme"
+  | "csv"
+  | "interview"
+  | "benchmark"
+  | "reviews"
+  | "pos"
+  | "social";
 
 interface ModeCard {
   id: Mode;
@@ -12,48 +22,28 @@ interface ModeCard {
 
 const MODES: ModeCard[] = [
   {
-    id: "interview",
+    id: "ask",
     icon: "💬",
-    title: "Answer questions",
-    description: "Tell us what you know about your customers — takes 60 seconds.",
+    title: "Just ask me",
+    description:
+      "Answer a few quick questions about your business — or see instant benchmarks for your industry.",
     badge: "Easiest",
   },
   {
-    id: "benchmark",
-    icon: "📈",
-    title: "Industry benchmarks",
-    description: "See typical segments for your business type. Zero input needed.",
-    badge: "Instant",
-  },
-  {
-    id: "csv",
+    id: "data",
     icon: "📊",
-    title: "Upload data",
-    description: "Import a CSV from your POS, CRM, email platform, or spreadsheet.",
+    title: "I have data",
+    description:
+      "Upload a spreadsheet or paste sales data from Square, Clover, Toast, or any POS system.",
+    badge: "CSV, POS, CRM",
   },
   {
-    id: "reviews",
+    id: "text",
     icon: "⭐",
-    title: "Analyze reviews",
-    description: "Paste your Google or Yelp reviews to understand who's talking about you.",
-  },
-  {
-    id: "pos",
-    icon: "🧾",
-    title: "Paste transactions",
-    description: "Copy-paste sales data from Square, Clover, Toast, or any POS system.",
-  },
-  {
-    id: "social",
-    icon: "📱",
-    title: "Social audience",
-    description: "Paste your bio, recent posts, and comments to understand your following.",
-  },
-  {
-    id: "teachme",
-    icon: "🤖",
-    title: "Guide me",
-    description: "Answer 5 AI-guided questions one at a time. Like a mini consulting session.",
+    title: "I have reviews or posts",
+    description:
+      "Paste your Google, Yelp, or social media content to understand who's talking about you.",
+    badge: "Google, Yelp, social",
   },
 ];
 
@@ -71,7 +61,7 @@ export default function SegmentHub({ onSelect }: SegmentHubProps) {
         Choose how you want to analyze your customer base
       </p>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3">
         {MODES.map((mode) => (
           <button
             key={mode.id}
@@ -79,7 +69,7 @@ export default function SegmentHub({ onSelect }: SegmentHubProps) {
             className="group flex items-start gap-4 rounded-xl border-2 border-zinc-200 bg-white p-4 text-left transition-all hover:border-blue-400 hover:shadow-md active:scale-[0.98] dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-blue-500"
           >
             <span className="mt-0.5 text-2xl">{mode.icon}</span>
-            <div className="flex-1 min-w-0">
+            <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-bold text-zinc-900 dark:text-zinc-50">
                   {mode.title}
@@ -101,10 +91,22 @@ export default function SegmentHub({ onSelect }: SegmentHubProps) {
         ))}
       </div>
 
+      <p className="mt-4 text-center text-sm text-zinc-400 dark:text-zinc-500">
+        Not sure?{" "}
+        <button
+          onClick={() => onSelect("teachme")}
+          className="text-blue-600 underline underline-offset-2 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+        >
+          Let our AI guide you
+        </button>
+      </p>
+
       <div className="mt-6 flex items-start gap-2 rounded-lg bg-green-50 px-4 py-3 dark:bg-green-950">
         <span className="mt-0.5 text-sm">🔒</span>
         <p className="text-xs leading-relaxed text-green-800 dark:text-green-200">
-          <strong>Your data stays private.</strong> Any files or text you provide are processed in your browser or anonymized before analysis. Nothing is stored.
+          <strong>Your data stays private.</strong> Any files or text you
+          provide are processed in your browser or anonymized before analysis.
+          Nothing is stored.
         </p>
       </div>
     </div>

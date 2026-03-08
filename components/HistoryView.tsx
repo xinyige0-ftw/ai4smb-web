@@ -50,6 +50,20 @@ export default function HistoryView() {
   const [activeCampaign, setActiveCampaign] = useState<CampaignItem | null>(null);
   const [activeSegment, setActiveSegment] = useState<SegmentItem | null>(null);
   const [tab, setTab] = useState<"segments" | "campaigns">("segments");
+  const [deleting, setDeleting] = useState<string | null>(null);
+
+  async function handleDelete(id: string, type: "campaign" | "segment") {
+    if (!confirm(`Delete this ${type}? This cannot be undone.`)) return;
+    setDeleting(id);
+    try {
+      const res = await fetch(`/api/history?id=${id}&type=${type}`, { method: "DELETE" });
+      if (res.ok) {
+        if (type === "campaign") setCampaigns((prev) => prev.filter((c) => c.id !== id));
+        else setSegments((prev) => prev.filter((s) => s.id !== id));
+      }
+    } catch {}
+    setDeleting(null);
+  }
 
   useEffect(() => {
     const anonId =
@@ -71,6 +85,7 @@ export default function HistoryView() {
     return (
       <CampaignResults
         campaign={activeCampaign.result as Parameters<typeof CampaignResults>[0]["campaign"]}
+        campaignId={activeCampaign.id}
         onRegenerate={() => {}}
         onStartOver={() => setActiveCampaign(null)}
         onAdjust={() => setActiveCampaign(null)}
@@ -83,6 +98,7 @@ export default function HistoryView() {
     return (
       <SegmentResults
         result={activeSegment.result as Parameters<typeof SegmentResults>[0]["result"]}
+        resultId={activeSegment.id}
         meta={{ rowCount: 0, columnCount: 0 }}
         metaLabel={activeSegment.meta_label || MODE_LABELS[activeSegment.mode] || activeSegment.mode}
         onStartOver={() => setActiveSegment(null)}
@@ -145,25 +161,34 @@ export default function HistoryView() {
             <p className="py-8 text-center text-sm text-zinc-400">No segment analyses yet.</p>
           )}
           {segments.map((seg) => (
-            <button
-              key={seg.id}
-              onClick={() => setActiveSegment(seg)}
-              className="group flex items-start gap-4 rounded-xl border border-zinc-200 bg-white p-4 text-left transition-all hover:border-blue-400 hover:shadow-md dark:border-zinc-700 dark:bg-zinc-900"
-            >
-              <span className="mt-0.5 text-2xl">🔍</span>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 truncate">
-                    {seg.name || seg.meta_label || MODE_LABELS[seg.mode] || "Customer Segments"}
-                  </span>
-                  <span className="shrink-0 rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
-                    {MODE_LABELS[seg.mode] || seg.mode}
-                  </span>
+            <div key={seg.id} className="group relative">
+              <button
+                onClick={() => setActiveSegment(seg)}
+                className="flex w-full items-start gap-4 rounded-xl border border-zinc-200 bg-white p-4 text-left transition-all hover:border-blue-400 hover:shadow-md dark:border-zinc-700 dark:bg-zinc-900"
+              >
+                <span className="mt-0.5 text-2xl">🔍</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 truncate">
+                      {seg.name || seg.meta_label || MODE_LABELS[seg.mode] || "Customer Segments"}
+                    </span>
+                    <span className="shrink-0 rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+                      {MODE_LABELS[seg.mode] || seg.mode}
+                    </span>
+                  </div>
+                  <p className="mt-0.5 text-xs text-zinc-400">{timeAgo(seg.created_at)}</p>
                 </div>
-                <p className="mt-0.5 text-xs text-zinc-400">{timeAgo(seg.created_at)}</p>
-              </div>
-              <span className="mt-1 text-zinc-300 group-hover:text-blue-500 dark:text-zinc-600">→</span>
-            </button>
+                <span className="mt-1 text-zinc-300 group-hover:text-blue-500 dark:text-zinc-600">→</span>
+              </button>
+              <button
+                onClick={() => handleDelete(seg.id, "segment")}
+                disabled={deleting === seg.id}
+                className="absolute top-2 right-2 rounded-md p-1.5 text-zinc-300 opacity-0 transition-all hover:text-red-500 group-hover:opacity-100 dark:text-zinc-600 dark:hover:text-red-400"
+                title="Delete"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+              </button>
+            </div>
           ))}
         </div>
       )}
@@ -175,33 +200,42 @@ export default function HistoryView() {
             <p className="py-8 text-center text-sm text-zinc-400">No campaigns generated yet.</p>
           )}
           {campaigns.map((camp) => (
-            <button
-              key={camp.id}
-              onClick={() => setActiveCampaign(camp)}
-              className="group flex items-start gap-4 rounded-xl border border-zinc-200 bg-white p-4 text-left transition-all hover:border-blue-400 hover:shadow-md dark:border-zinc-700 dark:bg-zinc-900"
-            >
-              <span className="mt-0.5 text-2xl">📣</span>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 truncate">
-                    {camp.name || camp.business_name || camp.business_type || "Campaign"}
-                  </span>
-                  {camp.goal && (
-                    <span className="shrink-0 rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400 capitalize">
-                      {camp.goal.replace(/_/g, " ")}
+            <div key={camp.id} className="group relative">
+              <button
+                onClick={() => setActiveCampaign(camp)}
+                className="flex w-full items-start gap-4 rounded-xl border border-zinc-200 bg-white p-4 text-left transition-all hover:border-blue-400 hover:shadow-md dark:border-zinc-700 dark:bg-zinc-900"
+              >
+                <span className="mt-0.5 text-2xl">📣</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 truncate">
+                      {camp.name || camp.business_name || camp.business_type || "Campaign"}
                     </span>
-                  )}
+                    {camp.goal && (
+                      <span className="shrink-0 rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400 capitalize">
+                        {camp.goal.replace(/_/g, " ")}
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-0.5 text-xs text-zinc-400">{timeAgo(camp.created_at)}</p>
                 </div>
-                <p className="mt-0.5 text-xs text-zinc-400">{timeAgo(camp.created_at)}</p>
-              </div>
-              <span className="mt-1 text-zinc-300 group-hover:text-blue-500 dark:text-zinc-600">→</span>
-            </button>
+                <span className="mt-1 text-zinc-300 group-hover:text-blue-500 dark:text-zinc-600">→</span>
+              </button>
+              <button
+                onClick={() => handleDelete(camp.id, "campaign")}
+                disabled={deleting === camp.id}
+                className="absolute top-2 right-2 rounded-md p-1.5 text-zinc-300 opacity-0 transition-all hover:text-red-500 group-hover:opacity-100 dark:text-zinc-600 dark:hover:text-red-400"
+                title="Delete"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+              </button>
+            </div>
           ))}
         </div>
       )}
 
       <div className="mt-8 text-center text-xs text-zinc-400 dark:text-zinc-600">
-        History is tied to this browser. Sign in (coming soon) to sync across devices.
+        History is tied to this browser. Sign in to sync across devices.
       </div>
     </div>
   );

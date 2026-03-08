@@ -97,7 +97,7 @@ export function stripPiiFromSummary(summary: CsvSummary): CsvSummary {
   };
 }
 
-export function buildSegmentPrompt(summary: CsvSummary, businessContext?: string): string {
+export function buildSegmentPrompt(summary: CsvSummary, businessContext?: string, locale?: string): string {
   const colDescriptions = summary.columns
     .map((c) => {
       let desc = `- "${c.name}" (${c.type}, ${c.uniqueCount} unique values, ${c.missing} missing)`;
@@ -119,7 +119,7 @@ ${JSON.stringify(summary.sampleRows.slice(0, 15), null, 2)}
 
 ${businessContext ? `Business context: ${businessContext}` : ""}
 
-Create 3-5 meaningful customer segments based on patterns in this data. For each segment, explain WHO they are, HOW MANY fall into it (estimate percentage), and WHAT to do with them.
+Create 3-5 meaningful customer segments based on patterns in this data. For each segment, explain WHO they are, HOW MANY fall into it (estimate percentage), WHERE to reach them, and WHAT to tell them.
 
 Respond ONLY with valid JSON matching this schema:
 {
@@ -132,7 +132,20 @@ Respond ONLY with valid JSON matching this schema:
       "description": "Who are these people, 1-2 sentences",
       "characteristics": ["trait 1", "trait 2", "trait 3"],
       "size": number (estimated count),
-      "recommendations": ["action 1", "action 2"]
+      "recommendations": ["action 1", "action 2"],
+      "propensityScore": "high" | "medium" | "low" (likelihood to convert),
+      "lifetimeValueTier": "high" | "medium" | "low" (estimated customer value),
+      "intent": "string describing what this segment wants (e.g. 'convenience seekers', 'deal hunters')",
+      "bestChannels": [
+        { "channel": "channel name", "fit": "high" | "medium", "reason": "why this channel works" }
+      ],
+      "avoidChannels": [
+        { "channel": "channel name", "reason": "why this would waste budget" }
+      ],
+      "messagingAngle": "the key message that resonates with this segment",
+      "offerSuggestion": "specific promotion or content idea",
+      "toneGuidance": "how to speak to this segment (e.g. casual, premium, urgent)",
+      "reasoning": "plain-English explanation of why this segment was identified and why these recommendations"
     }
   ],
   "quickWins": [
@@ -141,13 +154,28 @@ Respond ONLY with valid JSON matching this schema:
   ],
   "dataQuality": "1 sentence about any data issues or suggestions for better tracking"
 }
+${locale === "zh" ? "\nIMPORTANT: Respond entirely in Simplified Chinese (简体中文). Segment names, descriptions, characteristics, recommendations, and all text must be in Chinese." : ""}
 `.trim();
 }
 
-export const SEGMENT_SYSTEM_PROMPT = `You are a customer analytics expert who helps small businesses understand their customers. You analyze raw data and find actionable patterns — not generic advice, but specific segments and recommendations tied to the actual data.
+export function getSegmentSystemPrompt(locale?: string): string {
+  const base = `You are a customer analytics expert who helps small businesses understand their customers. You analyze raw data and find actionable patterns — not generic advice, but specific segments and recommendations tied to the actual data.
 
 When estimating segment sizes, make sure percentages add up to approximately 100%. Base your segments on real patterns in the data, not generic marketing personas.
 
 Be specific: use actual values from the data (dollar amounts, dates, product names) in your descriptions and recommendations.
 
+For each segment, also determine:
+- propensityScore and lifetimeValueTier based on observable data patterns (purchase frequency, order values, recency).
+- intent: a short phrase capturing what drives this segment (e.g. "convenience seekers", "deal hunters", "premium experience seekers").
+- bestChannels: 1-3 marketing channels that would work well for this segment, with fit level and reasoning drawn from the data (e.g. if data shows email engagement, recommend email).
+- avoidChannels: channels that would waste budget for this segment, with reasoning.
+- messagingAngle, offerSuggestion, and toneGuidance: concrete creative direction grounded in the segment's behavior.
+- reasoning: a plain-English explanation of why this segment exists and why you made these specific recommendations.
+
 Always respond with valid JSON only. No markdown, no code fences, no explanation outside the JSON.`;
+  if (locale === "zh") return base + "\n\nRespond entirely in Simplified Chinese (简体中文).";
+  return base;
+}
+
+export const SEGMENT_SYSTEM_PROMPT = getSegmentSystemPrompt();

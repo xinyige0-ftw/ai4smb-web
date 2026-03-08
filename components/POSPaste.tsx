@@ -20,6 +20,7 @@ export default function POSPaste({ onBack }: { onBack: () => void }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<SegmentData | null>(null);
+  const [resultId, setResultId] = useState<string | null>(null);
   const [previewHeaders, setPreviewHeaders] = useState<string[]>([]);
   const [previewRows, setPreviewRows] = useState<string[][]>([]);
   const [rowCount, setRowCount] = useState(0);
@@ -65,6 +66,7 @@ export default function POSPaste({ onBack }: { onBack: () => void }) {
       const data = await res.json();
       if (!res.ok) { setError(data.error || "Something went wrong."); return; }
       setResult(data.result);
+      setResultId(data.id || null);
     } catch {
       setError("Network error. Please try again.");
     } finally {
@@ -76,6 +78,7 @@ export default function POSPaste({ onBack }: { onBack: () => void }) {
     return (
       <SegmentResults
         result={result}
+        resultId={resultId}
         meta={{ rowCount, columnCount: previewHeaders.length }}
         metaLabel={`${rowCount} transactions analyzed from your POS data`}
         onStartOver={onBack}

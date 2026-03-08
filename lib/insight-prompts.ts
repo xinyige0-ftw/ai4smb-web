@@ -12,7 +12,20 @@ Respond ONLY with valid JSON matching this schema:
       "description": "Who are these people, 1-2 sentences",
       "characteristics": ["trait 1", "trait 2", "trait 3"],
       "size": number (estimated count, 0 if unknown),
-      "recommendations": ["specific action 1", "specific action 2"]
+      "recommendations": ["specific action 1", "specific action 2"],
+      "propensityScore": "high" | "medium" | "low" (likelihood to convert),
+      "lifetimeValueTier": "high" | "medium" | "low" (estimated customer value),
+      "intent": "what this segment is looking for (e.g. 'convenience seekers', 'deal hunters')",
+      "bestChannels": [
+        { "channel": "channel name", "fit": "high" | "medium", "reason": "why this channel works" }
+      ],
+      "avoidChannels": [
+        { "channel": "channel name", "reason": "why this would waste budget" }
+      ],
+      "messagingAngle": "the key message that resonates with this segment",
+      "offerSuggestion": "specific promotion or content idea",
+      "toneGuidance": "how to speak to this segment (e.g. casual, premium, urgent)",
+      "reasoning": "plain-English explanation of why this segment was identified and why these recommendations"
     }
   ],
   "quickWins": [
@@ -21,13 +34,27 @@ Respond ONLY with valid JSON matching this schema:
   "dataQuality": "One sentence on reliability of these segments and what simple data to start tracking"
 }`;
 
-export const INSIGHT_SYSTEM_PROMPT = `You are a customer analytics expert helping small business owners understand their customers. You create actionable, specific segments — not generic personas.
+export function getInsightSystemPrompt(locale?: string): string {
+  const base = `You are a customer analytics expert helping small business owners understand their customers. You create actionable, specific segments — not generic personas.
 
 Segment names should be memorable and specific (e.g. "Friday Night Regulars" not "Loyal Customers"). Recommendations must be concrete and doable without a big budget or team.
+
+For each segment, also provide:
+- propensityScore and lifetimeValueTier based on the information available.
+- intent: a concise phrase describing what drives this segment.
+- bestChannels: 1-3 marketing channels with fit level and reasoning. Consider the business type and segment behavior when recommending channels.
+- avoidChannels: channels that would waste budget for this segment, with reasoning.
+- messagingAngle, offerSuggestion, and toneGuidance: concrete creative direction tailored to the segment.
+- reasoning: a plain-English explanation connecting the segment to the evidence and recommendations.
 
 When working from limited information, be honest about what's inferred vs. observed, but still deliver useful segments grounded in the actual information provided. Percentages should sum to approximately 100%.
 
 Always respond with valid JSON only. No markdown, no code fences, no explanation outside the JSON.`;
+  if (locale === "zh") return base + "\n\nRespond entirely in Simplified Chinese (简体中文).";
+  return base;
+}
+
+export const INSIGHT_SYSTEM_PROMPT = getInsightSystemPrompt();
 
 // ─── INTERVIEW MODE ───────────────────────────────────────────────
 
@@ -72,7 +99,7 @@ export interface InterviewAnswers {
   extraNotes?: string;
 }
 
-export function buildInterviewPrompt(answers: InterviewAnswers): string {
+export function buildInterviewPrompt(answers: InterviewAnswers, locale?: string): string {
   const businessLabel =
     BUSINESS_TYPES.find((b) => b.id === answers.businessType)?.label ||
     answers.businessType;
@@ -106,6 +133,7 @@ In quickWins, suggest 2-3 actions the owner can take THIS WEEK based on what the
 In dataQuality, suggest one simple thing to start tracking (e.g. "ask every new customer how they found you").
 
 ${SEGMENT_OUTPUT_SCHEMA}
+${locale === "zh" ? "\nIMPORTANT: Respond entirely in Simplified Chinese (简体中文). Segment names, descriptions, characteristics, recommendations, and all text must be in Chinese." : ""}
 `.trim();
 }
 
@@ -116,7 +144,7 @@ export interface BenchmarkInput {
   location?: string;
 }
 
-export function buildBenchmarkPrompt(input: BenchmarkInput): string {
+export function buildBenchmarkPrompt(input: BenchmarkInput, locale?: string): string {
   const businessLabel =
     BUSINESS_TYPES.find((b) => b.id === input.businessType)?.label ||
     input.businessType;
@@ -132,12 +160,13 @@ Based on your knowledge of typical customer patterns for ${businessLabel} busine
 These are industry benchmarks, not data from this specific business. In the dataQuality field, say clearly that these are typical patterns for this business type and encourage the owner to upload their own data or answer questions about their specific customers to get personalized insights.
 
 ${SEGMENT_OUTPUT_SCHEMA}
+${locale === "zh" ? "\nIMPORTANT: Respond entirely in Simplified Chinese (简体中文). Segment names, descriptions, characteristics, recommendations, and all text must be in Chinese." : ""}
 `.trim();
 }
 
 // ─── REVIEW ANALYSIS ──────────────────────────────────────────────
 
-export function buildReviewPrompt(reviewText: string, businessType?: string): string {
+export function buildReviewPrompt(reviewText: string, businessType?: string, locale?: string): string {
   const businessLabel = businessType
     ? BUSINESS_TYPES.find((b) => b.id === businessType)?.label || businessType
     : null;
@@ -163,12 +192,13 @@ Use actual themes and language from the reviews to ground each segment. Don't cr
 In dataQuality, note that review writers are a self-selected group (skewed toward strong opinions) and suggest other sources to cross-check these segments.
 
 ${SEGMENT_OUTPUT_SCHEMA}
+${locale === "zh" ? "\nIMPORTANT: Respond entirely in Simplified Chinese (简体中文). Segment names, descriptions, characteristics, recommendations, and all text must be in Chinese." : ""}
 `.trim();
 }
 
 // ─── SOCIAL ANALYSIS ──────────────────────────────────────────────
 
-export function buildSocialPrompt(socialContent: string, businessType?: string): string {
+export function buildSocialPrompt(socialContent: string, businessType?: string, locale?: string): string {
   const businessLabel = businessType
     ? BUSINESS_TYPES.find((b) => b.id === businessType)?.label || businessType
     : null;
@@ -188,11 +218,14 @@ Based on this content, identify 3-5 customer segments by inferring:
 - Language and demographics visible in comments or follower descriptions
 - What content drives the most engagement and who that audience likely is
 - What the business emphasizes and who that naturally attracts
+- For RedNote (小红书) content: analyze note titles, body text, comments, likes/saves patterns, hashtag usage
+- For WeChat content: analyze Moments engagement, Official Account article reads/shares, comment sentiment
 
 Ground segments in what was actually provided. Note what's inferred.
 In dataQuality, note the limitations (social followers ≠ all customers) and suggest what to track.
 
 ${SEGMENT_OUTPUT_SCHEMA}
+${locale === "zh" ? "\nIMPORTANT: Respond entirely in Simplified Chinese (简体中文). Segment names, descriptions, characteristics, recommendations, and all text must be in Chinese." : ""}
 `.trim();
 }
 
@@ -215,7 +248,7 @@ export interface TeachMeConversation {
   qas: TeachMeQA[];
 }
 
-export function buildTeachMePrompt(conversation: TeachMeConversation): string {
+export function buildTeachMePrompt(conversation: TeachMeConversation, locale?: string): string {
   const qaText = conversation.qas
     .map((qa, i) => `Q${i + 1}: ${qa.question}\nOwner: ${qa.answer}`)
     .join("\n\n");
@@ -233,5 +266,6 @@ For each segment, ground every characteristic and recommendation in what they to
 In dataQuality, suggest one simple tracking habit they can start tomorrow.
 
 ${SEGMENT_OUTPUT_SCHEMA}
+${locale === "zh" ? "\nIMPORTANT: Respond entirely in Simplified Chinese (简体中文). Segment names, descriptions, characteristics, recommendations, and all text must be in Chinese." : ""}
 `.trim();
 }

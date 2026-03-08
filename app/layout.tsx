@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 import AnonTracker from "@/components/AnonTracker";
 import "./globals.css";
 
@@ -18,18 +20,23 @@ export const metadata: Metadata = {
   description: "Free AI-powered marketing tools for small businesses. Generate campaigns and understand your customers — no experience needed.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="en">
+    <html lang={locale}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AnonTracker />
-        {children}
+        <NextIntlClientProvider messages={messages}>
+          <AnonTracker />
+          {children}
+        </NextIntlClientProvider>
       </body>
     </html>
   );

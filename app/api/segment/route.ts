@@ -1,13 +1,15 @@
 import Groq from "groq-sdk";
-import { buildSegmentPrompt, SEGMENT_SYSTEM_PROMPT, type CsvSummary } from "@/lib/segment-prompts";
+import { buildSegmentPrompt, getSegmentSystemPrompt, type CsvSummary } from "@/lib/segment-prompts";
 import { getOrCreateSession, saveSegment } from "@/lib/supabase";
+import { getUser } from "@/lib/auth";
+import { checkRateLimit } from "@/lib/rate-limit";
 import {
   buildInterviewPrompt,
   buildBenchmarkPrompt,
   buildReviewPrompt,
   buildSocialPrompt,
   buildTeachMePrompt,
-  INSIGHT_SYSTEM_PROMPT,
+  getInsightSystemPrompt,
   type InterviewAnswers,
   type BenchmarkInput,
   type TeachMeConversation,
@@ -15,25 +17,16 @@ import {
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY || "" });
 
-const RATE_LIMIT_MAP = new Map<string, { count: number; resetAt: number }>();
-const MAX_PER_HOUR = 10;
-
-function checkRateLimit(anonId: string): boolean {
-  const now = Date.now();
-  const entry = RATE_LIMIT_MAP.get(anonId);
-  if (!entry || now > entry.resetAt) {
-    RATE_LIMIT_MAP.set(anonId, { count: 1, resetAt: now + 3600_000 });
-    return true;
-  }
-  if (entry.count >= MAX_PER_HOUR) return false;
-  entry.count++;
-  return true;
-}
-
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { anonId, mode = "csv" } = body as { anonId?: string; mode?: string };
+    const { anonId, mode = "csv", locale } = body as { anonId?: string; mode?: string; locale?: string };
+
+    let userId: string | undefined;
+    try {
+      const user = await getUser();
+      if (user) userId = user.id;
+    } catch {}
 
     if (anonId && !checkRateLimit(anonId)) {
       return Response.json(
@@ -56,8 +49,8 @@ export async function POST(req: Request) {
         if (!summary?.columns?.length || !summary?.rowCount) {
           return Response.json({ error: "No data summary provided" }, { status: 400 });
         }
-        prompt = buildSegmentPrompt(summary, businessContext);
-        systemPrompt = SEGMENT_SYSTEM_PROMPT;
+        prompt = buildSegmentPrompt(summary, businessContext, locale);
+        systemPrompt = getSegmentSystemPrompt(locale);
         metaRowCount = summary.rowCount;
         metaColCount = summary.columns.length;
         break;
@@ -67,8 +60,8 @@ export async function POST(req: Request) {
         if (!answers?.businessType) {
           return Response.json({ error: "Missing interview answers" }, { status: 400 });
         }
-        prompt = buildInterviewPrompt(answers);
-        systemPrompt = INSIGHT_SYSTEM_PROMPT;
+        prompt = buildInterviewPrompt(answers, locale);
+        systemPrompt = getInsightSystemPrompt(locale);
         break;
       }
       case "benchmark": {
@@ -76,8 +69,8 @@ export async function POST(req: Request) {
         if (!input?.businessType) {
           return Response.json({ error: "Missing business type" }, { status: 400 });
         }
-        prompt = buildBenchmarkPrompt(input);
-        systemPrompt = INSIGHT_SYSTEM_PROMPT;
+        prompt = buildBenchmarkPrompt(input, locale);
+        systemPrompt = getInsightSystemPrompt(locale);
         break;
       }
       case "reviews": {
@@ -88,8 +81,8 @@ export async function POST(req: Request) {
         if (!reviewText?.trim()) {
           return Response.json({ error: "No review text provided" }, { status: 400 });
         }
-        prompt = buildReviewPrompt(reviewText, businessType);
-        systemPrompt = INSIGHT_SYSTEM_PROMPT;
+        prompt = buildReviewPrompt(reviewText, businessType, locale);
+        systemPrompt = getInsightSystemPrompt(locale);
         break;
       }
       case "social": {
@@ -100,8 +93,8 @@ export async function POST(req: Request) {
         if (!socialContent?.trim()) {
           return Response.json({ error: "No social content provided" }, { status: 400 });
         }
-        prompt = buildSocialPrompt(socialContent, businessType);
-        systemPrompt = INSIGHT_SYSTEM_PROMPT;
+        prompt = buildSocialPrompt(socialContent, businessType, locale);
+        systemPrompt = getInsightSystemPrompt(locale);
         break;
       }
       case "teachme": {
@@ -109,8 +102,8 @@ export async function POST(req: Request) {
         if (!conversation?.qas?.length) {
           return Response.json({ error: "No conversation data provided" }, { status: 400 });
         }
-        prompt = buildTeachMePrompt(conversation);
-        systemPrompt = INSIGHT_SYSTEM_PROMPT;
+        prompt = buildTeachMePrompt(conversation, locale);
+        systemPrompt = getInsightSystemPrompt(locale);
         break;
       }
       default:
@@ -137,21 +130,23 @@ export async function POST(req: Request) {
       segmentCount: result.segments?.length,
     });
 
-    // Save to DB (non-blocking)
+    let savedId: string | null = null;
     if (anonId && anonId !== "unknown") {
       const metaLabel = body.metaLabel as string | undefined;
-      getOrCreateSession(anonId).then((sessionId) =>
-        saveSegment({
+      try {
+        const sessionId = await getOrCreateSession(anonId, userId);
+        savedId = await saveSegment({
           session_id: sessionId,
           mode,
           result,
           meta_label: metaLabel,
-        })
-      ).catch(() => {});
+        });
+      } catch {}
     }
 
     return Response.json({
       result,
+      id: savedId,
       meta: { rowCount: metaRowCount, columnCount: metaColCount, mode },
     });
   } catch (err) {

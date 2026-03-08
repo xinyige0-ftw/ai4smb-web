@@ -9,6 +9,8 @@ const CHANNEL_LABELS: Record<string, { label: string; icon: string }> = {
   google_ads: { label: "Google Ads", icon: "🔍" },
   tiktok: { label: "TikTok", icon: "🎵" },
   sms: { label: "SMS", icon: "💬" },
+  xiaohongshu: { label: "小红书 RedNote", icon: "📕" },
+  wechat: { label: "微信 WeChat", icon: "💚" },
 };
 
 function ContentBlock({ label, value }: { label: string; value: string }) {
@@ -46,80 +48,136 @@ interface ChannelCardProps {
   content: Record<string, unknown>;
 }
 
+function hasVariants(content: Record<string, unknown>): content is { variant_a: Record<string, unknown>; variant_b: Record<string, unknown> } {
+  return content.variant_a != null && typeof content.variant_a === "object"
+    && content.variant_b != null && typeof content.variant_b === "object";
+}
+
+function renderChannelContent(channel: string, content: Record<string, unknown>) {
+  switch (channel) {
+    case "email":
+      return (
+        <>
+          <ContentBlock label="Subject Line" value={String(content.subject || "")} />
+          <ContentBlock label="Email Body" value={String(content.body || "")} />
+        </>
+      );
+    case "instagram":
+      return (
+        <>
+          <ContentBlock label="Caption" value={String(content.caption || "")} />
+          <ContentBlock label="Image Idea" value={String(content.imageIdea || "")} />
+          {content.bestTime && (
+            <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+              Best time to post: {String(content.bestTime)}
+            </p>
+          )}
+        </>
+      );
+    case "facebook":
+      return (
+        <>
+          <ContentBlock label="Post" value={String(content.text || "")} />
+          {content.boostTip && (
+            <ContentBlock label="Boost Tip" value={String(content.boostTip || "")} />
+          )}
+        </>
+      );
+    case "google_ads":
+      return (
+        <>
+          {Array.isArray(content.headlines) && (
+            <ContentBlock label="Headlines" value={content.headlines.join("\n")} />
+          )}
+          {Array.isArray(content.descriptions) && (
+            <ContentBlock label="Descriptions" value={content.descriptions.join("\n")} />
+          )}
+          {Array.isArray(content.keywords) && (
+            <ContentBlock label="Keywords" value={content.keywords.join(", ")} />
+          )}
+          {content.dailyBudget && (
+            <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+              Suggested daily budget: {String(content.dailyBudget)}
+            </p>
+          )}
+        </>
+      );
+    case "tiktok":
+      return (
+        <>
+          <ContentBlock label="Hook (first 3 seconds)" value={String(content.hook || "")} />
+          <ContentBlock label="Script" value={String(content.script || "")} />
+          <ContentBlock label="Call to Action" value={String(content.cta || "")} />
+        </>
+      );
+    case "sms":
+      return <ContentBlock label="Message" value={String(content.text || "")} />;
+    case "xiaohongshu":
+      return (
+        <>
+          <ContentBlock label="Note Title" value={String(content.title || "")} />
+          <ContentBlock label="Note Body" value={String(content.body || "")} />
+          {Array.isArray(content.hashtags) && (
+            <ContentBlock label="Hashtags" value={content.hashtags.map((h: string) => `#${h}`).join(" ")} />
+          )}
+          {content.coverTextIdea && (
+            <ContentBlock label="Cover Text Idea" value={String(content.coverTextIdea)} />
+          )}
+          {Array.isArray(content.productTags) && content.productTags.length > 0 && (
+            <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+              Product tags: {content.productTags.join(", ")}
+            </p>
+          )}
+          {content.bestTime && (
+            <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+              Best time to post: {String(content.bestTime)}
+            </p>
+          )}
+        </>
+      );
+    case "wechat":
+      return (
+        <>
+          {content.momentsPost && (
+            <ContentBlock label="Moments Post" value={String(content.momentsPost)} />
+          )}
+          {content.officialAccountTitle && (
+            <ContentBlock label="Official Account Article" value={String(content.officialAccountTitle)} />
+          )}
+          {content.officialAccountSummary && (
+            <ContentBlock label="Article Summary" value={String(content.officialAccountSummary)} />
+          )}
+          {content.miniProgramCta && (
+            <ContentBlock label="Mini Program CTA" value={String(content.miniProgramCta)} />
+          )}
+          {content.bestTime && (
+            <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+              Best time to post: {String(content.bestTime)}
+            </p>
+          )}
+        </>
+      );
+    default:
+      return (
+        <ContentBlock
+          label="Content"
+          value={Object.entries(content)
+            .map(([k, v]) => `${k}: ${String(v)}`)
+            .join("\n")}
+        />
+      );
+  }
+}
+
 export default function ChannelCard({ channel, why, content }: ChannelCardProps) {
   const [showWhy, setShowWhy] = useState(false);
+  const [activeVariant, setActiveVariant] = useState<"a" | "b">("a");
   const info = CHANNEL_LABELS[channel] || { label: channel, icon: "📢" };
 
-  function renderContent() {
-    switch (channel) {
-      case "email":
-        return (
-          <>
-            <ContentBlock label="Subject Line" value={String(content.subject || "")} />
-            <ContentBlock label="Email Body" value={String(content.body || "")} />
-          </>
-        );
-      case "instagram":
-        return (
-          <>
-            <ContentBlock label="Caption" value={String(content.caption || "")} />
-            <ContentBlock label="Image Idea" value={String(content.imageIdea || "")} />
-            {content.bestTime && (
-              <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
-                🕐 Best time to post: {String(content.bestTime)}
-              </p>
-            )}
-          </>
-        );
-      case "facebook":
-        return (
-          <>
-            <ContentBlock label="Post" value={String(content.text || "")} />
-            {content.boostTip && (
-              <ContentBlock label="Boost Tip" value={String(content.boostTip || "")} />
-            )}
-          </>
-        );
-      case "google_ads":
-        return (
-          <>
-            {Array.isArray(content.headlines) && (
-              <ContentBlock label="Headlines" value={content.headlines.join("\n")} />
-            )}
-            {Array.isArray(content.descriptions) && (
-              <ContentBlock label="Descriptions" value={content.descriptions.join("\n")} />
-            )}
-            {Array.isArray(content.keywords) && (
-              <ContentBlock label="Keywords" value={content.keywords.join(", ")} />
-            )}
-            {content.dailyBudget && (
-              <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
-                💰 Suggested daily budget: {String(content.dailyBudget)}
-              </p>
-            )}
-          </>
-        );
-      case "tiktok":
-        return (
-          <>
-            <ContentBlock label="Hook (first 3 seconds)" value={String(content.hook || "")} />
-            <ContentBlock label="Script" value={String(content.script || "")} />
-            <ContentBlock label="Call to Action" value={String(content.cta || "")} />
-          </>
-        );
-      case "sms":
-        return <ContentBlock label="Message" value={String(content.text || "")} />;
-      default:
-        return (
-          <ContentBlock
-            label="Content"
-            value={Object.entries(content)
-              .map(([k, v]) => `${k}: ${String(v)}`)
-              .join("\n")}
-          />
-        );
-    }
-  }
+  const variants = hasVariants(content);
+  const displayContent = variants
+    ? (activeVariant === "a" ? content.variant_a : content.variant_b) as Record<string, unknown>
+    : content;
 
   return (
     <div className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-700 dark:bg-zinc-900">
@@ -128,12 +186,38 @@ export default function ChannelCard({ channel, why, content }: ChannelCardProps)
           <span>{info.icon}</span>
           {info.label}
         </h3>
-        <button
-          onClick={() => setShowWhy(!showWhy)}
-          className="text-xs font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400"
-        >
-          {showWhy ? "Hide reasoning" : "Why this channel?"}
-        </button>
+        <div className="flex items-center gap-3">
+          {variants && (
+            <div className="flex rounded-full bg-zinc-100 p-0.5 dark:bg-zinc-800">
+              <button
+                onClick={() => setActiveVariant("a")}
+                className={`rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors ${
+                  activeVariant === "a"
+                    ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-zinc-50"
+                    : "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+                }`}
+              >
+                A
+              </button>
+              <button
+                onClick={() => setActiveVariant("b")}
+                className={`rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors ${
+                  activeVariant === "b"
+                    ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-zinc-50"
+                    : "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+                }`}
+              >
+                B
+              </button>
+            </div>
+          )}
+          <button
+            onClick={() => setShowWhy(!showWhy)}
+            className="text-xs font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400"
+          >
+            {showWhy ? "Hide reasoning" : "Why this channel?"}
+          </button>
+        </div>
       </div>
 
       {showWhy && (
@@ -142,7 +226,7 @@ export default function ChannelCard({ channel, why, content }: ChannelCardProps)
         </p>
       )}
 
-      {renderContent()}
+      {renderChannelContent(channel, displayContent)}
     </div>
   );
 }

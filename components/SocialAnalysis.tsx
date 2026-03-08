@@ -20,6 +20,7 @@ export default function SocialAnalysis({ onBack }: { onBack: () => void }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<SegmentData | null>(null);
+  const [resultId, setResultId] = useState<string | null>(null);
 
   async function handleAnalyze() {
     if (!socialContent.trim()) return;
@@ -44,6 +45,7 @@ export default function SocialAnalysis({ onBack }: { onBack: () => void }) {
       const data = await res.json();
       if (!res.ok) { setError(data.error || "Something went wrong."); return; }
       setResult(data.result);
+      setResultId(data.id || null);
     } catch {
       setError("Network error. Please try again.");
     } finally {
@@ -55,6 +57,7 @@ export default function SocialAnalysis({ onBack }: { onBack: () => void }) {
     return (
       <SegmentResults
         result={result}
+        resultId={resultId}
         meta={{ rowCount: 0, columnCount: 0 }}
         metaLabel="Based on your social media content"
         onStartOver={onBack}
@@ -77,11 +80,12 @@ export default function SocialAnalysis({ onBack }: { onBack: () => void }) {
       <div className="mb-5 rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-900">
         <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">What to include</p>
         <div className="space-y-1 text-xs text-zinc-600 dark:text-zinc-400">
-          <p>✅ Your Instagram or Facebook bio</p>
+          <p>✅ Your Instagram, Facebook, RedNote (小红书), or WeChat bio</p>
           <p>✅ 5-10 recent post captions that got engagement</p>
           <p>✅ A few comments from followers (especially recurring ones)</p>
           <p>✅ Your follower count and any demographics you know</p>
           <p>✅ Which posts performed best vs. worst</p>
+          <p>✅ RedNote note titles, saves/likes counts, or WeChat Moments/article reads</p>
         </div>
       </div>
 

@@ -37,6 +37,8 @@ export const CHANNELS = [
   { id: "google", label: "Google Ads" },
   { id: "tiktok", label: "TikTok" },
   { id: "sms", label: "SMS" },
+  { id: "xiaohongshu", label: "小红书 RedNote" },
+  { id: "wechat", label: "微信 WeChat" },
 ] as const;
 
 export interface GenerateInput {
@@ -64,7 +66,7 @@ const TONE_MAP: Record<string, string> = {
   other: "professional and friendly",
 };
 
-export function buildPrompt(input: GenerateInput): string {
+export function buildPrompt(input: GenerateInput, locale?: string): string {
   const businessLabel =
     input.businessType === "other"
       ? input.businessTypeCustom || "small business"
@@ -111,17 +113,29 @@ Tone: ${tone}
 Generate a complete campaign brief with:
 1. "strategy" — 2-3 sentences explaining the overall approach, why these channels, and what to expect
 2. "channels" — an array of channel objects, each containing:
-   - "channel": the channel name (email, instagram, facebook, google_ads, tiktok, sms)
+   - "channel": the channel name (email, instagram, facebook, google_ads, tiktok, sms, xiaohongshu, wechat)
    - "why": 1-2 sentences on why this channel works for them
    - "content": channel-specific content object
+3. For each channel, generate TWO content variants (A and B) with different angles or tones:
+   - variant_a: the primary recommendation
+   - variant_b: an alternative approach (different angle, tone, or hook)
+   Wrap channel-specific fields inside "variant_a" and "variant_b" objects.
+4. "thisWeek" — an array of 3 specific, time-bound actions the business owner should take THIS WEEK:
+   [
+     { "day": "Monday", "action": "specific action", "why": "brief reason" },
+     { "day": "Wednesday", "action": "specific action", "why": "brief reason" },
+     { "day": "Friday", "action": "specific action", "why": "brief reason" }
+   ]
 
-Channel content formats:
+Channel content formats (these fields go INSIDE variant_a and variant_b):
 - email: { "subject": string, "body": string }
 - instagram: { "caption": string, "imageIdea": string, "bestTime": string }
 - facebook: { "text": string, "boostTip": string }
 - google_ads: { "headlines": string[], "descriptions": string[], "keywords": string[], "dailyBudget": string }
 - tiktok: { "hook": string, "script": string, "cta": string }
 - sms: { "text": string (under 160 chars) }
+- xiaohongshu: { "title": string (note title, ~20 chars, emoji-heavy), "body": string (300-800 chars with line breaks), "hashtags": string[], "coverTextIdea": string, "productTags": string[], "bestTime": string }
+- wechat: { "momentsPost": string (concise, personal tone), "officialAccountTitle": string, "officialAccountSummary": string (~100 chars), "miniProgramCta": string, "bestTime": string }
 
 Respond ONLY with valid JSON matching this schema:
 {
@@ -130,17 +144,36 @@ Respond ONLY with valid JSON matching this schema:
     {
       "channel": string,
       "why": string,
-      "content": object
+      "content": {
+        "variant_a": { ...channel-specific fields... },
+        "variant_b": { ...channel-specific fields... }
+      }
     }
+  ],
+  "thisWeek": [
+    { "day": string, "action": string, "why": string }
   ]
 }
+${locale === "zh" ? "\nIMPORTANT: Respond entirely in Simplified Chinese (简体中文). All strategy text, channel content, captions, headlines, email copy, and descriptions must be in Chinese. Only keep brand names and technical terms in English." : ""}
 `.trim();
 }
 
-export const SYSTEM_PROMPT = `You are a senior marketing strategist who specializes in helping small businesses with limited budgets. You think about channel selection, budget allocation, timing, and audience — not just words.
+export function getSystemPrompt(locale?: string): string {
+  const base = `You are a senior marketing strategist who specializes in helping small businesses with limited budgets. You think about channel selection, budget allocation, timing, and audience — not just words.
 
 When choosing channels, consider the business type, their likely audience, and budget constraints. Never suggest strategies that would waste a small budget. Be specific and actionable — give them copy they can paste and use today.
 
 Match the tone to the business type. A bakery should sound warm and inviting. A law firm should sound authoritative. A fitness studio should sound energetic.
 
+Channel-specific tone guidance:
+- For RedNote (小红书/xiaohongshu): Write in an authentic, lifestyle-oriented, visual-first style. Use emojis liberally. Content should feel like a genuine review or educational note, not an ad. Think "sharing a discovery with friends."
+- For WeChat (微信/wechat): Write in a trust-based, personal, less promotional tone. Content should feel community-driven and relationship-focused. Moments posts should read like personal updates, not marketing blasts.
+
 Always respond with valid JSON only. No markdown, no code fences, no explanation outside the JSON.`;
+  if (locale === "zh") {
+    return base + "\n\nThe user prefers Simplified Chinese. Respond entirely in Chinese (简体中文).";
+  }
+  return base;
+}
+
+export const SYSTEM_PROMPT = getSystemPrompt();

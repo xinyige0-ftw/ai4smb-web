@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import SegmentHub from "./SegmentHub";
+import type { Mode } from "./SegmentHub";
 import SegmentWizard from "./SegmentWizard";
 import InterviewMode from "./InterviewMode";
 import BenchmarkMode from "./BenchmarkMode";
@@ -10,14 +11,110 @@ import POSPaste from "./POSPaste";
 import SocialAnalysis from "./SocialAnalysis";
 import TeachMeMode from "./TeachMeMode";
 
-type Mode = null | "csv" | "interview" | "benchmark" | "reviews" | "pos" | "social" | "teachme";
+interface SubChoiceOption {
+  icon: string;
+  label: string;
+  target: Mode;
+}
+
+function SubChoice({
+  title,
+  options,
+  onSelect,
+  onBack,
+}: {
+  title: string;
+  options: SubChoiceOption[];
+  onSelect: (mode: Mode) => void;
+  onBack: () => void;
+}) {
+  return (
+    <div className="mx-auto w-full max-w-xl px-4 py-8">
+      <button
+        onClick={onBack}
+        className="mb-4 text-sm text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
+      >
+        ← Back
+      </button>
+      <h2 className="mb-6 text-center text-xl font-bold text-zinc-900 dark:text-zinc-50">
+        {title}
+      </h2>
+      <div className="grid gap-3">
+        {options.map((opt) => (
+          <button
+            key={opt.target}
+            onClick={() => onSelect(opt.target)}
+            className="group flex items-center gap-3 rounded-xl border-2 border-zinc-200 bg-white px-4 py-3 text-left transition-all hover:border-blue-400 hover:shadow-md active:scale-[0.98] dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-blue-500"
+          >
+            <span className="text-xl">{opt.icon}</span>
+            <span className="flex-1 text-sm font-medium text-zinc-900 dark:text-zinc-50">
+              {opt.label}
+            </span>
+            <span className="text-zinc-300 group-hover:text-blue-500 dark:text-zinc-600 dark:group-hover:text-blue-400">
+              →
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const ASK_OPTIONS: SubChoiceOption[] = [
+  { icon: "💬", label: "Answer questions", target: "interview" },
+  { icon: "📈", label: "Show me industry benchmarks", target: "benchmark" },
+  { icon: "🤖", label: "Guide me through it", target: "teachme" },
+];
+
+const DATA_OPTIONS: SubChoiceOption[] = [
+  { icon: "📁", label: "Upload a spreadsheet (CSV)", target: "csv" },
+  { icon: "📋", label: "Paste transaction data", target: "pos" },
+];
+
+const TEXT_OPTIONS: SubChoiceOption[] = [
+  { icon: "⭐", label: "Paste reviews (Google, Yelp)", target: "reviews" },
+  {
+    icon: "📱",
+    label: "Paste social content (Instagram, RedNote)",
+    target: "social",
+  },
+];
 
 export default function SegmentRouter() {
-  const [mode, setMode] = useState<Mode>(null);
+  const [mode, setMode] = useState<Mode | null>(null);
 
   const back = () => setMode(null);
 
   if (mode === null) return <SegmentHub onSelect={setMode} />;
+
+  if (mode === "ask")
+    return (
+      <SubChoice
+        title="How would you like to start?"
+        options={ASK_OPTIONS}
+        onSelect={setMode}
+        onBack={back}
+      />
+    );
+  if (mode === "data")
+    return (
+      <SubChoice
+        title="What kind of data do you have?"
+        options={DATA_OPTIONS}
+        onSelect={setMode}
+        onBack={back}
+      />
+    );
+  if (mode === "text")
+    return (
+      <SubChoice
+        title="What would you like to analyze?"
+        options={TEXT_OPTIONS}
+        onSelect={setMode}
+        onBack={back}
+      />
+    );
+
   if (mode === "csv") return <SegmentWizard onBack={back} />;
   if (mode === "interview") return <InterviewMode onBack={back} />;
   if (mode === "benchmark") return <BenchmarkMode onBack={back} />;

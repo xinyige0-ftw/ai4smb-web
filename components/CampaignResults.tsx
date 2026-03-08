@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import ChannelCard from "./ChannelCard";
 import PostAgent from "./PostAgent";
+import ReviewPrompt, { type ReviewSubmitData } from "./ReviewPrompt";
 import { formatCampaignReport, downloadText, copyText } from "@/lib/export";
 
 interface CampaignData {
@@ -37,6 +38,8 @@ export default function CampaignResults({
   const tc = useTranslations("common");
   const [copied, setCopied] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
+  const [showReview, setShowReview] = useState(false);
+  const [reviewSubmitted, setReviewSubmitted] = useState(false);
 
   function handleDownload() {
     downloadText(formatCampaignReport(campaign), "marketing-campaign.txt");
@@ -46,6 +49,21 @@ export default function CampaignResults({
     await copyText(formatCampaignReport(campaign));
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
+  }
+
+  async function handleReviewSubmit(data: ReviewSubmitData) {
+    try {
+      const anonId = localStorage.getItem("anonId") ?? "";
+      await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...data, anonId }),
+      });
+    } catch {
+      // silent – review is non-critical
+    }
+    setShowReview(false);
+    setReviewSubmitted(true);
   }
 
   async function handleShare() {
@@ -160,6 +178,36 @@ export default function CampaignResults({
       </div>
 
       <PostAgent channels={campaign.channels} />
+
+      {/* Review prompt */}
+      <div className="mt-8 rounded-xl border border-dashed border-zinc-300 bg-zinc-50/50 p-5 text-center dark:border-zinc-700 dark:bg-zinc-900/50">
+        {reviewSubmitted ? (
+          <p className="text-sm font-medium text-green-600 dark:text-green-400">
+            ✓ Thanks for your feedback!
+          </p>
+        ) : (
+          <>
+            <p className="mb-2 text-sm font-medium text-zinc-600 dark:text-zinc-300">
+              How was this campaign?
+            </p>
+            <button
+              onClick={() => setShowReview(true)}
+              className="rounded-full bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+            >
+              ⭐ Leave a rating
+            </button>
+          </>
+        )}
+      </div>
+
+      {showReview && (
+        <ReviewPrompt
+          onClose={() => setShowReview(false)}
+          onSubmit={handleReviewSubmit}
+          toolsUsed={["campaign_form"]}
+          campaignsCount={1}
+        />
+      )}
     </div>
   );
 }

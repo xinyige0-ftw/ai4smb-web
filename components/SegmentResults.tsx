@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import ReviewPrompt, { type ReviewSubmitData } from "./ReviewPrompt";
 import { formatSegmentReport, downloadText, copyText } from "@/lib/export";
 
 interface ChannelRec {
@@ -49,6 +51,7 @@ interface SegmentResultsProps {
   onStartOver: () => void;
   onReanalyze: () => void;
   loading: boolean;
+  toolUsed?: string;
 }
 
 const COLOR_MAP: Record<string, { bg: string; border: string; text: string; bar: string }> = {
@@ -83,6 +86,7 @@ function SegmentCard({ segment }: { segment: Segment }) {
   const [recsExpanded, setRecsExpanded] = useState(false);
   const [reasoningExpanded, setReasoningExpanded] = useState(false);
   const router = useRouter();
+  const t = useTranslations("segmentResults");
   const c = getColor(segment.color);
 
   function handleCampaign() {
@@ -112,10 +116,10 @@ function SegmentCard({ segment }: { segment: Segment }) {
         </div>
         <div className="ml-4 flex flex-col items-end gap-1">
           <div className={`text-2xl font-bold ${c.text}`}>{segment.percentage}%</div>
-          <div className="text-xs text-zinc-500 dark:text-zinc-400">~{segment.size} customers</div>
+          <div className="text-xs text-zinc-500 dark:text-zinc-400">{t("customers", { size: segment.size })}</div>
           <div className="flex gap-1">
-            <TierBadge label="Propensity" value={segment.propensityScore} />
-            <TierBadge label="LTV" value={segment.lifetimeValueTier} />
+            <TierBadge label={t("propensity")} value={segment.propensityScore} />
+            <TierBadge label={t("ltv")} value={segment.lifetimeValueTier} />
           </div>
         </div>
       </div>
@@ -144,7 +148,7 @@ function SegmentCard({ segment }: { segment: Segment }) {
       {(segment.bestChannels?.length || segment.avoidChannels?.length) && (
         <div className="mt-4">
           <h4 className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-            Where to reach them
+            {t("whereToReach")}
           </h4>
           {segment.bestChannels && segment.bestChannels.length > 0 && (
             <div className="mt-2 space-y-1.5">
@@ -170,7 +174,7 @@ function SegmentCard({ segment }: { segment: Segment }) {
               {segment.avoidChannels.map((ch, i) => (
                 <div key={i} className="flex items-start gap-2 text-sm">
                   <span className="mt-0.5 shrink-0 rounded-full bg-rose-100 px-1.5 py-0.5 text-[10px] font-bold text-rose-700 dark:bg-rose-900 dark:text-rose-300">
-                    avoid
+                    {t("avoid")}
                   </span>
                   <span className="font-medium text-zinc-800 dark:text-zinc-200">{ch.channel}</span>
                   <span className="text-zinc-500 dark:text-zinc-400">— {ch.reason}</span>
@@ -185,17 +189,17 @@ function SegmentCard({ segment }: { segment: Segment }) {
       {(segment.messagingAngle || segment.offerSuggestion || segment.toneGuidance) && (
         <div className="mt-4">
           <h4 className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-            What to tell them
+            {t("whatToTell")}
           </h4>
           <div className="mt-2 space-y-1.5 text-sm text-zinc-700 dark:text-zinc-300">
             {segment.messagingAngle && (
-              <p><span className="font-semibold">Message:</span> {segment.messagingAngle}</p>
+              <p><span className="font-semibold">{t("messageLabel")}</span> {segment.messagingAngle}</p>
             )}
             {segment.offerSuggestion && (
-              <p><span className="font-semibold">Offer idea:</span> {segment.offerSuggestion}</p>
+              <p><span className="font-semibold">{t("offerIdea")}</span> {segment.offerSuggestion}</p>
             )}
             {segment.toneGuidance && (
-              <p><span className="font-semibold">Tone:</span> {segment.toneGuidance}</p>
+              <p><span className="font-semibold">{t("toneLabel")}</span> {segment.toneGuidance}</p>
             )}
           </div>
         </div>
@@ -206,7 +210,7 @@ function SegmentCard({ segment }: { segment: Segment }) {
         onClick={() => setRecsExpanded(!recsExpanded)}
         className={`mt-3 text-xs font-semibold ${c.text}`}
       >
-        {recsExpanded ? "Hide recommendations ▲" : `${segment.recommendations.length} recommendations ▼`}
+        {recsExpanded ? t("hideRecommendations") : t("recommendations", { count: segment.recommendations.length })}
       </button>
       {recsExpanded && (
         <ul className="mt-2 space-y-1.5">
@@ -226,7 +230,7 @@ function SegmentCard({ segment }: { segment: Segment }) {
             onClick={() => setReasoningExpanded(!reasoningExpanded)}
             className={`mt-2 text-xs font-semibold ${c.text}`}
           >
-            {reasoningExpanded ? "Hide reasoning ▲" : "Why this recommendation? ▼"}
+            {reasoningExpanded ? t("hideReasoning") : t("whyThisRecommendation")}
           </button>
           {reasoningExpanded && (
             <p className="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
@@ -242,7 +246,7 @@ function SegmentCard({ segment }: { segment: Segment }) {
           onClick={handleCampaign}
           className="mt-4 w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
         >
-          Turn this into a campaign →
+          {t("turnIntoCampaign")}
         </button>
       )}
     </div>
@@ -257,9 +261,13 @@ export default function SegmentResults({
   onStartOver,
   onReanalyze,
   loading,
+  toolUsed,
 }: SegmentResultsProps) {
+  const t = useTranslations("segmentResults");
   const [copied, setCopied] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
+  const [showReview, setShowReview] = useState(false);
+  const [reviewSubmitted, setReviewSubmitted] = useState(false);
 
   function handleDownload() {
     const text = formatSegmentReport(result, metaLabel);
@@ -273,6 +281,21 @@ export default function SegmentResults({
     setTimeout(() => setCopied(false), 2500);
   }
 
+  async function handleReviewSubmit(data: ReviewSubmitData) {
+    try {
+      const anonId = localStorage.getItem("anonId") ?? "";
+      await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...data, anonId }),
+      });
+    } catch {
+      // silent – review is non-critical
+    }
+    setShowReview(false);
+    setReviewSubmitted(true);
+  }
+
   async function handleShare() {
     if (!resultId) return;
     const url = window.location.origin + "/share/" + resultId;
@@ -284,13 +307,13 @@ export default function SegmentResults({
   const metaText =
     metaLabel ||
     (meta.rowCount > 0
-      ? `${meta.rowCount} customers analyzed across ${meta.columnCount} data points`
+      ? t("metaText", { rowCount: meta.rowCount, columnCount: meta.columnCount })
       : null);
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-8">
       <h1 className="mb-2 text-center text-2xl font-bold text-zinc-900 dark:text-zinc-50">
-        Your Audience Segments
+        {t("title")}
       </h1>
       {metaText && (
         <p className="mb-1 text-center text-zinc-500 dark:text-zinc-400">{metaText}</p>
@@ -299,7 +322,7 @@ export default function SegmentResults({
       {/* Summary */}
       <div className="my-6 rounded-xl border border-blue-200 bg-blue-50 p-5 dark:border-blue-800 dark:bg-blue-950">
         <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-blue-700 dark:text-blue-300">
-          Key Insight
+          {t("keyInsight")}
         </h2>
         <p className="text-sm leading-relaxed text-blue-900 dark:text-blue-100">
           {result.summary}
@@ -309,7 +332,7 @@ export default function SegmentResults({
       {/* Segment distribution bar */}
       <div className="mb-6">
         <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-          Segment Distribution
+          {t("segmentDistribution")}
         </div>
         <div className="flex h-6 w-full overflow-hidden rounded-full">
           {result.segments.map((seg) => {
@@ -348,7 +371,7 @@ export default function SegmentResults({
       {result.quickWins?.length > 0 && (
         <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-5 dark:border-amber-800 dark:bg-amber-950">
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">
-            Quick Wins
+            {t("quickWins")}
           </h2>
           <ul className="space-y-2">
             {result.quickWins.map((win, i) => (
@@ -378,39 +401,69 @@ export default function SegmentResults({
           {loading ? (
             <>
               <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-              Re-analyzing...
+              {t("reanalyzing")}
             </>
           ) : (
-            "Re-analyze"
+            t("reanalyze")
           )}
         </button>
         <button
           onClick={handleDownload}
           className="rounded-lg border border-zinc-300 px-5 py-3 text-sm font-medium text-zinc-600 transition-all hover:bg-zinc-50 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
         >
-          📥 Download
+          {"📥 "}{t("download")}
         </button>
         <button
           onClick={handleCopy}
           className="rounded-lg border border-zinc-300 px-5 py-3 text-sm font-medium text-zinc-600 transition-all hover:bg-zinc-50 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
         >
-          {copied ? "✓ Copied!" : "📋 Copy all"}
+          {copied ? `✓ ${t("copied")}` : `📋 ${t("copyAll")}`}
         </button>
         {resultId && (
           <button
             onClick={handleShare}
             className="rounded-lg border border-zinc-300 px-5 py-3 text-sm font-medium text-zinc-600 transition-all hover:bg-zinc-50 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
           >
-            {shareCopied ? "✓ Link copied!" : "🔗 Share"}
+            {shareCopied ? `✓ ${t("linkCopied")}` : `🔗 ${t("share")}`}
           </button>
         )}
         <button
           onClick={onStartOver}
           className="rounded-lg px-5 py-3 text-sm font-medium text-zinc-400 transition-all hover:text-zinc-600 dark:hover:text-zinc-300"
         >
-          Try another method
+          {t("tryAnother")}
         </button>
       </div>
+
+      {/* Review prompt */}
+      <div className="mt-8 rounded-xl border border-dashed border-zinc-300 bg-zinc-50/50 p-5 text-center dark:border-zinc-700 dark:bg-zinc-900/50">
+        {reviewSubmitted ? (
+          <p className="text-sm font-medium text-green-600 dark:text-green-400">
+            {"✓ "}{t("thanksFeedback")}
+          </p>
+        ) : (
+          <>
+            <p className="mb-2 text-sm font-medium text-zinc-600 dark:text-zinc-300">
+              {t("howWasAnalysis")}
+            </p>
+            <button
+              onClick={() => setShowReview(true)}
+              className="rounded-full bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+            >
+              {"⭐ "}{t("leaveRating")}
+            </button>
+          </>
+        )}
+      </div>
+
+      {showReview && (
+        <ReviewPrompt
+          onClose={() => setShowReview(false)}
+          onSubmit={handleReviewSubmit}
+          toolsUsed={[toolUsed ?? "segment_csv"]}
+          segmentsCount={result.segments.length}
+        />
+      )}
     </div>
   );
 }

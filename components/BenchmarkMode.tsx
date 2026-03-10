@@ -99,10 +99,10 @@ export default function BenchmarkMode({ onBack }: { onBack: () => void }) {
 
       <input
         type="text"
-        placeholder={t("locationPlaceholder")}
+        placeholder={t("locationPlaceholder") + " *"}
         value={location}
         onChange={(e) => setLocation(e.target.value)}
-        className="mt-5 w-full rounded-lg border border-zinc-300 px-4 py-3 text-sm dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+        className={`mt-5 w-full rounded-lg border px-4 py-3 text-sm dark:bg-zinc-800 dark:text-zinc-100 ${!location.trim() ? "border-red-300 dark:border-red-700" : "border-zinc-300 dark:border-zinc-600"}`}
       />
 
       {error && (
@@ -120,7 +120,7 @@ export default function BenchmarkMode({ onBack }: { onBack: () => void }) {
         </button>
         <button
           onClick={handleAnalyze}
-          disabled={!businessType || loading}
+          disabled={!businessType || !location.trim() || loading}
           className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-700 disabled:opacity-40"
         >
           {loading ? (

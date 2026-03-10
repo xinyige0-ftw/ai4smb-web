@@ -300,6 +300,8 @@
     "textPlaceholder": "说说你的想法（可选）",
     "textInputPlaceholder": "你觉得最有用的是什么？",
     "namePlaceholder": "你的名字或店名（可选）",
+    "locationLabel": "你的位置",
+    "locationPlaceholder": "城市或地区，比如 上海、北京",
     "submit": "提交评价",
     "thanks": "评价已提交！审核通过后会显示。",
     "npsQuestion": "你有多大可能把AI4SMB推荐给朋友或同事？",

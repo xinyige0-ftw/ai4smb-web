@@ -173,10 +173,10 @@ export default function InterviewMode({ onBack }: InterviewModeProps) {
             <div className="flex items-center gap-1.5">
               <input
                 type="text"
-                placeholder={t("locationPlaceholder")}
+                placeholder={t("locationPlaceholder") + " *"}
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="min-w-0 flex-1 rounded-lg border border-zinc-300 px-4 py-3 text-sm dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+                className={`min-w-0 flex-1 rounded-lg border px-4 py-3 text-sm dark:bg-zinc-800 dark:text-zinc-100 ${!location.trim() ? "border-red-300 dark:border-red-700" : "border-zinc-300 dark:border-zinc-600"}`}
               />
               <VoiceInput onTranscript={(t) => setLocation((v) => v + (v ? " " : "") + t)} />
             </div>
@@ -314,7 +314,7 @@ export default function InterviewMode({ onBack }: InterviewModeProps) {
             </button>
             <button
               onClick={handleAnalyze}
-              disabled={loading || !businessType}
+              disabled={loading || !businessType || !location.trim()}
               className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-700 disabled:opacity-40"
             >
               {loading ? (

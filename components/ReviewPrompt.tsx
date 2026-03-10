@@ -57,6 +57,7 @@ export default function ReviewPrompt({
   const t = useTranslations("review");
   const hasUserInfo = !!(userEmail || userName);
   const [rating, setRating] = useState(0);
+  const [reviewLocation, setReviewLocation] = useState(location);
   const [hoveredStar, setHoveredStar] = useState(0);
   const [npsScore, setNpsScore] = useState<number | null>(null);
   const [hoveredNps, setHoveredNps] = useState<number | null>(null);
@@ -77,7 +78,7 @@ export default function ReviewPrompt({
       displayName: isAnonymous ? "" : displayName,
       email: isAnonymous ? "" : email,
       businessType,
-      location,
+      location: reviewLocation,
       isAnonymous,
       consentDisplay,
       consentContact,
@@ -242,6 +243,20 @@ export default function ReviewPrompt({
           </p>
         </div>
 
+        {/* Location (required) */}
+        <div className="mb-4">
+          <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            {t("locationLabel")} <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            value={reviewLocation}
+            onChange={(e) => setReviewLocation(e.target.value)}
+            className={`w-full rounded-xl border bg-white px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 outline-none transition-colors focus:border-blue-400 focus:ring-1 focus:ring-blue-400 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder-zinc-500 ${!reviewLocation.trim() ? "border-red-300 dark:border-red-700" : "border-zinc-200 dark:border-zinc-700"}`}
+            placeholder={t("locationPlaceholder")}
+          />
+        </div>
+
         {/* Identity toggle */}
         <div className="mb-4 rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
           <p className="mb-3 text-sm font-medium text-zinc-700 dark:text-zinc-300">
@@ -330,7 +345,7 @@ export default function ReviewPrompt({
         </div>
 
         <button
-          disabled={rating === 0}
+          disabled={rating === 0 || !reviewLocation.trim()}
           onClick={handleSubmit}
           className="w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
         >

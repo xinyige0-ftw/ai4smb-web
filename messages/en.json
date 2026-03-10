@@ -300,6 +300,8 @@
     "textPlaceholder": "Tell us what you think (optional)",
     "textInputPlaceholder": "What did you find most useful?",
     "namePlaceholder": "Your name or business name (optional)",
+    "locationLabel": "Your location",
+    "locationPlaceholder": "City or region, e.g. San Francisco, CA",
     "submit": "Submit review",
     "thanks": "Review submitted! It will appear after approval.",
     "npsQuestion": "How likely are you to recommend AI4SMB to a friend or colleague?",

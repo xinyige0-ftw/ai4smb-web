@@ -154,10 +154,7 @@ export default function GenerateWizard() {
             {BUSINESS_TYPES.map((bt) => (
               <button
                 key={bt.id}
-                onClick={() => {
-                  setBusinessType(bt.id);
-                  if (bt.id !== "other") setStep(2);
-                }}
+                onClick={() => setBusinessType(bt.id)}
                 className={`flex flex-col items-center gap-1.5 rounded-xl border-2 p-4 text-center transition-all active:scale-95
                   ${businessType === bt.id
                     ? "border-blue-600 bg-blue-50 dark:bg-blue-950"
@@ -171,50 +168,53 @@ export default function GenerateWizard() {
           </div>
 
           {businessType === "other" && (
-            <div className="mt-4">
-              <input
-                type="text"
-                placeholder={t("customPlaceholder")}
-                value={businessTypeCustom}
-                onChange={(e) => setBusinessTypeCustom(e.target.value)}
-                className="w-full rounded-lg border border-zinc-300 px-4 py-3 text-sm dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
-                autoFocus
-              />
-              <button
-                onClick={() => businessTypeCustom.trim() && setStep(2)}
-                disabled={!businessTypeCustom.trim()}
-                className="mt-3 w-full rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white disabled:opacity-40"
-              >
-                {t("continue")}
-              </button>
-            </div>
+            <input
+              type="text"
+              placeholder={t("customPlaceholder")}
+              value={businessTypeCustom}
+              onChange={(e) => setBusinessTypeCustom(e.target.value)}
+              className="mt-4 w-full rounded-lg border border-zinc-300 px-4 py-3 text-sm dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+              autoFocus
+            />
           )}
 
-          {!showName && businessType !== "other" && (
-            <button
-              onClick={() => setShowName(true)}
-              className="mt-4 w-full text-center text-sm text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
-            >
-              {t("addBusinessName")}
-            </button>
-          )}
-          {showName && (
-            <>
-              <input
-                type="text"
-                placeholder={t("businessNamePlaceholder")}
-                value={businessName}
-                onChange={(e) => setBusinessName(e.target.value)}
-                className="mt-4 w-full rounded-lg border border-zinc-300 px-4 py-3 text-sm dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
-              />
+          {businessType && (
+            <div className="mt-4 space-y-2">
               <input
                 type="text"
                 placeholder={t("locationPlaceholder")}
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="mt-2 w-full rounded-lg border border-zinc-300 px-4 py-3 text-sm dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+                className={`w-full rounded-lg border px-4 py-3 text-sm dark:bg-zinc-800 dark:text-zinc-100 ${!location.trim() ? "border-red-300 dark:border-red-700" : "border-zinc-300 dark:border-zinc-600"}`}
               />
-            </>
+              {!showName ? (
+                <button
+                  onClick={() => setShowName(true)}
+                  className="w-full text-center text-sm text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+                >
+                  {t("addBusinessName")}
+                </button>
+              ) : (
+                <input
+                  type="text"
+                  placeholder={t("businessNamePlaceholder")}
+                  value={businessName}
+                  onChange={(e) => setBusinessName(e.target.value)}
+                  className="w-full rounded-lg border border-zinc-300 px-4 py-3 text-sm dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+                />
+              )}
+              <button
+                onClick={() => {
+                  if (businessType === "other" && !businessTypeCustom.trim()) return;
+                  if (!location.trim()) return;
+                  setStep(2);
+                }}
+                disabled={!location.trim() || (businessType === "other" && !businessTypeCustom.trim())}
+                className="mt-2 w-full rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white disabled:opacity-40"
+              >
+                {t("continue")}
+              </button>
+            </div>
           )}
         </div>
       )}

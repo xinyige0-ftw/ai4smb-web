@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import ImageGenerator from "./ImageGenerator";
 
 const CHANNEL_LABELS: Record<string, { label: string; icon: string }> = {
   email: { label: "Email", icon: "📧" },
@@ -69,6 +70,14 @@ function renderChannelContent(channel: string, content: Record<string, unknown>,
         <>
           <ContentBlock label={t("caption")} value={String(content.caption || "")} {...cp} />
           <ContentBlock label={t("imageIdea")} value={String(content.imageIdea || "")} {...cp} />
+          {content.imageIdea && (
+            <ImageGenerator
+              prompt={String(content.imageIdea)}
+              width={1080}
+              height={1080}
+              label={t("generateImage")}
+            />
+          )}
           {content.bestTime && (
             <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
               {t("bestTime")}: {String(content.bestTime)}
@@ -80,6 +89,14 @@ function renderChannelContent(channel: string, content: Record<string, unknown>,
       return (
         <>
           <ContentBlock label={t("post")} value={String(content.text || "")} {...cp} />
+          {content.text && (
+            <ImageGenerator
+              prompt={`Facebook post image for: ${String(content.text).slice(0, 200)}`}
+              width={1200}
+              height={630}
+              label={t("generateImage")}
+            />
+          )}
           {content.boostTip && (
             <ContentBlock label={t("boostTip")} value={String(content.boostTip || "")} {...cp} />
           )}
@@ -110,6 +127,14 @@ function renderChannelContent(channel: string, content: Record<string, unknown>,
           <ContentBlock label={t("hook")} value={String(content.hook || "")} {...cp} />
           <ContentBlock label={t("script")} value={String(content.script || "")} {...cp} />
           <ContentBlock label={t("callToAction")} value={String(content.cta || "")} {...cp} />
+          {content.hook && (
+            <ImageGenerator
+              prompt={`TikTok thumbnail: ${String(content.hook)}`}
+              width={1080}
+              height={1920}
+              label={t("generateThumbnail")}
+            />
+          )}
         </>
       );
     case "sms":
@@ -123,7 +148,15 @@ function renderChannelContent(channel: string, content: Record<string, unknown>,
             <ContentBlock label={t("hashtags")} value={content.hashtags.map((h: string) => `#${h}`).join(" ")} {...cp} />
           )}
           {content.coverTextIdea && (
-            <ContentBlock label={t("coverTextIdea")} value={String(content.coverTextIdea)} {...cp} />
+            <>
+              <ContentBlock label={t("coverTextIdea")} value={String(content.coverTextIdea)} {...cp} />
+              <ImageGenerator
+                prompt={String(content.coverTextIdea)}
+                width={1080}
+                height={1440}
+                label={t("generateCover")}
+              />
+            </>
           )}
           {Array.isArray(content.productTags) && content.productTags.length > 0 && (
             <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">

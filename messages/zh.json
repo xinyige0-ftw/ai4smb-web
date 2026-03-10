@@ -256,7 +256,10 @@
     "officialAccount": "公众号文章",
     "articleSummary": "文章摘要",
     "miniProgramCta": "小程序引导语",
-    "content": "内容"
+    "content": "内容",
+    "generateImage": "生成图片",
+    "generateThumbnail": "生成封面图",
+    "generateCover": "生成封面图片"
   },
   "postAgent": {
     "title": "准备发布",

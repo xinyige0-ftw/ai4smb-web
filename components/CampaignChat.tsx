@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import CampaignResults from "./CampaignResults";
+import ImageGenerator from "./ImageGenerator";
 
 interface Message {
   role: "user" | "assistant";
@@ -297,10 +298,22 @@ export default function CampaignChat({ onBack }: CampaignChatProps) {
               💡 {asset.tips}
             </p>
           )}
+          {VISUAL_ASSET_TYPES.has(asset.assetType) && (
+            <ImageGenerator
+              prompt={asset.title + ": " + asset.content.slice(0, 300)}
+              width={asset.assetType === "flyer" ? 1080 : 1080}
+              height={asset.assetType === "flyer" ? 1440 : 1080}
+              label={locale === "zh" ? "生成图片" : "Generate image"}
+            />
+          )}
         </div>
       </div>
     );
   }
+
+  const VISUAL_ASSET_TYPES = new Set([
+    "coupon", "flyer", "social_post", "invite", "promo", "loyalty_card",
+  ]);
 
   const hasGenerated = campaign !== null;
 

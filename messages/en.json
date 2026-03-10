@@ -256,7 +256,10 @@
     "officialAccount": "Official Account Article",
     "articleSummary": "Article Summary",
     "miniProgramCta": "Mini Program CTA",
-    "content": "Content"
+    "content": "Content",
+    "generateImage": "Generate image",
+    "generateThumbnail": "Generate thumbnail",
+    "generateCover": "Generate cover image"
   },
   "postAgent": {
     "title": "Ready to Post",

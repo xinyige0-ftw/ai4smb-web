@@ -39,6 +39,12 @@ export function getInsightSystemPrompt(locale?: string): string {
 
 Segment names should be memorable and specific (e.g. "Friday Night Regulars" not "Loyal Customers"). Recommendations must be concrete and doable without a big budget or team.
 
+When a location is provided, USE IT in your analysis:
+- Consider local demographics, foot traffic patterns, and regional preferences
+- Tailor channel recommendations to the local market (e.g. Nextdoor for suburban areas, Instagram for urban areas)
+- Reference the area in messaging angles and offer suggestions
+- Factor in local competition, tourist vs. resident mix, seasonal patterns for that area
+
 For each segment, also provide:
 - propensityScore and lifetimeValueTier based on the information available.
 - intent: a concise phrase describing what drives this segment.
@@ -126,6 +132,7 @@ What the owner told us about their customers:
 ${answers.extraNotes ? `- Additional notes: "${answers.extraNotes}"` : ""}
 
 Create 3-5 distinct customer segments grounded in what the owner described. Don't invent groups with no basis in their answers. If information is limited, make reasonable inferences and flag them.
+${answers.location ? `\nThe business is located in ${answers.location}. Factor this into your segment analysis — consider local demographics, foot traffic patterns, and area-specific customer behavior. Tailor channel and messaging recommendations to this location.` : ""}
 
 For each segment, use what the owner told you to craft specific, recognizable names (e.g. "Morning Commuters" not "Regular Customers") and concrete recommendations they can act on immediately.
 
@@ -155,9 +162,11 @@ You are an expert in U.S. small business customer analytics with deep knowledge 
 Business type: ${businessLabel}
 ${input.location ? `Location: ${input.location}` : "Location: United States (general)"}
 
-Based on your knowledge of typical customer patterns for ${businessLabel} businesses in the U.S., identify the 3-5 most common customer segments. Ground these in real industry patterns — who typically visits this type of business, why, how often, and what they value.
+Based on your knowledge of typical customer patterns for ${businessLabel} businesses${input.location ? ` in ${input.location}` : " in the U.S."}, identify the 3-5 most common customer segments. Ground these in real industry patterns — who typically visits this type of business, why, how often, and what they value.
 
-These are industry benchmarks, not data from this specific business. In the dataQuality field, say clearly that these are typical patterns for this business type and encourage the owner to upload their own data or answer questions about their specific customers to get personalized insights.
+${input.location ? `Factor in the demographics, lifestyle, and market characteristics specific to ${input.location}. Consider local competition, foot traffic patterns, income levels, and cultural preferences typical of this area.` : ""}
+
+These are industry benchmarks, not data from this specific business. In the dataQuality field, say clearly that these are typical patterns for this business type${input.location ? ` in ${input.location}` : ""} and encourage the owner to upload their own data or answer questions about their specific customers to get personalized insights.
 
 ${SEGMENT_OUTPUT_SCHEMA}
 ${locale === "zh" ? "\nIMPORTANT: Respond entirely in Simplified Chinese (简体中文). Segment names, descriptions, characteristics, recommendations, and all text must be in Chinese." : ""}

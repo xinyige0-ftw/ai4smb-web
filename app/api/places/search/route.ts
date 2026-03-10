@@ -19,20 +19,31 @@ export async function GET(req: Request) {
   }
 
   try {
-    const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&type=establishment&key=${PLACES_KEY}`;
-    const res = await fetch(url);
+    const res = await fetch("https://places.googleapis.com/v1/places:searchText", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Goog-Api-Key": PLACES_KEY,
+        "X-Goog-FieldMask": "places.id,places.displayName,places.formattedAddress,places.rating,places.userRatingCount",
+      },
+      body: JSON.stringify({
+        textQuery: query,
+        maxResultCount: 5,
+      }),
+    });
+
     const data = await res.json();
 
-    if (data.status !== "OK" && data.status !== "ZERO_RESULTS") {
-      return Response.json({ error: data.error_message || "Places search failed" }, { status: 500 });
+    if (!res.ok) {
+      return Response.json({ error: data.error?.message || "Places search failed" }, { status: 500 });
     }
 
-    const results = (data.results || []).slice(0, 5).map((p: Record<string, unknown>) => ({
-      placeId: p.place_id,
-      name: p.name,
-      address: p.formatted_address,
+    const results = (data.places || []).map((p: Record<string, unknown>) => ({
+      placeId: p.id,
+      name: (p.displayName as Record<string, string>)?.text || "",
+      address: p.formattedAddress,
       rating: p.rating,
-      totalRatings: p.user_ratings_total,
+      totalRatings: p.userRatingCount,
     }));
 
     return Response.json({ results });

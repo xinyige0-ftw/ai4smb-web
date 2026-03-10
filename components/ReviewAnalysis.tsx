@@ -196,7 +196,7 @@ export default function ReviewAnalysis({ onBack }: { onBack: () => void }) {
           </div>
         )}
         <p className="mt-2 text-xs text-blue-600/70 dark:text-blue-400/70">
-          We&apos;ll pull up to 10 Google reviews automatically. Paste more below for deeper insights.
+          We&apos;ll pull your latest Google reviews automatically. Paste more below for deeper insights.
         </p>
       </div>
 

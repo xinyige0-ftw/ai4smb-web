@@ -1,3 +1,5 @@
+import { checkPlacesLimit } from "@/lib/places-rate-limit";
+
 const PLACES_KEY = process.env.GOOGLE_PLACES_API_KEY || "";
 
 export async function GET(req: Request) {
@@ -10,6 +12,10 @@ export async function GET(req: Request) {
 
   if (!PLACES_KEY) {
     return Response.json({ error: "Places API not configured" }, { status: 500 });
+  }
+
+  if (!checkPlacesLimit(1)) {
+    return Response.json({ error: "Monthly Google Places limit reached. Please paste reviews manually." }, { status: 429 });
   }
 
   try {

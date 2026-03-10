@@ -133,10 +133,10 @@ export default function CampaignResults({
           <div className="space-y-3">
             {campaign.thisWeek.map((item, i) => (
               <div key={i} className="flex items-start gap-3">
-                <span className="shrink-0 rounded-lg bg-green-100 px-2 py-1 text-xs font-bold text-green-700 dark:bg-green-900 dark:text-green-300">
+                <span className="w-16 shrink-0 rounded-lg bg-green-100 py-1 text-center text-xs font-bold text-green-700 dark:bg-green-900 dark:text-green-300">
                   {item.day}
                 </span>
-                <div>
+                <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-green-900 dark:text-green-100">{item.action}</p>
                   <p className="text-xs text-green-600 dark:text-green-400">{item.why}</p>
                 </div>

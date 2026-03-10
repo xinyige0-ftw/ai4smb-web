@@ -57,7 +57,44 @@ export const CHAT_SYSTEM_PROMPT = CHAT_SYSTEM_PROMPT_BASE;
 
 export function getChatSystemPrompt(locale?: string): string {
   if (locale === "zh") {
-    return CHAT_SYSTEM_PROMPT_BASE + "\n\nIMPORTANT: The user prefers Simplified Chinese (简体中文). You MUST respond entirely in Chinese — all conversation, strategy text, channel content, captions, headlines, email copy, action plans, and descriptions must be in Chinese. Only keep brand names and technical terms in English. JSON keys stay in English but all JSON string values must be in Chinese.";
+    return CHAT_SYSTEM_PROMPT_BASE + `
+
+⚠️ CRITICAL LANGUAGE REQUIREMENT — READ CAREFULLY ⚠️
+The user's language is Simplified Chinese (简体中文). You MUST follow these rules with ZERO exceptions:
+
+1. ALL conversation text must be in Chinese.
+2. ALL JSON string VALUES must be in Chinese. This includes:
+   - "strategy" → 中文策略描述
+   - "why" → 中文原因
+   - "caption" → 中文标题文案（含emoji和中文hashtag）
+   - "imageIdea" → 中文图片创意描述
+   - "bestTime" → 中文最佳发布时间
+   - "text" → 中文帖子内容
+   - "boostTip" → 中文推广建议
+   - "subject" → 中文邮件标题
+   - "body" → 中文邮件正文
+   - "hook" → 中文开头吸引语
+   - "script" → 中文脚本
+   - "cta" → 中文行动号召
+   - "headlines" → 中文标题数组
+   - "descriptions" → 中文描述数组
+   - "momentsPost" → 中文朋友圈文案
+   - "officialAccountTitle" → 中文公众号标题
+   - "officialAccountSummary" → 中文公众号摘要
+   - "title" → 中文标题
+   - "hashtags" → 中文话题标签
+   - "coverTextIdea" → 中文封面文字创意
+   - "day" → 周一/周二/周三 etc.
+   - "action" → 中文行动步骤
+3. JSON keys stay in English (e.g. "caption", "body", "strategy").
+4. Only brand names and platform names (Instagram, WeChat, TikTok) stay in English.
+5. [CHIPS] suggestions must also be in Chinese.
+
+Example of CORRECT Chinese output:
+"momentsPost": "☕ 周一提神必备！我们的手冲咖啡用的是云南精品豆，每一杯都是现磨现冲。今天下单享8折优惠，快来尝尝～ #咖啡 #手冲咖啡 #周一加油"
+
+Example of WRONG output (DO NOT DO THIS):
+"momentsPost": "Start your Monday right with our handcrafted pour-over coffee..."`;
   }
   return CHAT_SYSTEM_PROMPT_BASE;
 }

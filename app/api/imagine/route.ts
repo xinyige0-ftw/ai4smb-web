@@ -71,16 +71,16 @@ export async function POST(req: Request) {
 
     const enhanced = `${prompt.slice(0, 500)}, professional marketing photo, high quality, clean composition`;
 
-    // Try Together AI first (fastest, free unlimited)
-    const togetherUrl = await tryTogether(enhanced, width, height);
-    if (togetherUrl) {
-      return Response.json({ image: togetherUrl, source: "together" });
-    }
-
-    // Fallback to Hugging Face (free tier, new router endpoint)
+    // Try Hugging Face first (free tier, reliable)
     const hfUrl = await tryHuggingFace(enhanced);
     if (hfUrl) {
       return Response.json({ image: hfUrl, source: "huggingface" });
+    }
+
+    // Fallback to Together AI (requires credits)
+    const togetherUrl = await tryTogether(enhanced, width, height);
+    if (togetherUrl) {
+      return Response.json({ image: togetherUrl, source: "together" });
     }
 
     // Both failed — client will try Pollinations as final fallback

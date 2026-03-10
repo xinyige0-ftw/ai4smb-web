@@ -27,6 +27,21 @@ interface CampaignResultsProps {
   loading: boolean;
 }
 
+const DAY_MAP: Record<string, string> = {
+  monday: "Mon", tuesday: "Tue", wednesday: "Wed", thursday: "Thu",
+  friday: "Fri", saturday: "Sat", sunday: "Sun",
+  mon: "Mon", tue: "Tue", wed: "Wed", thu: "Thu", fri: "Fri", sat: "Sat", sun: "Sun",
+  "周一": "周一", "周二": "周二", "周三": "周三", "周四": "周四",
+  "周五": "周五", "周六": "周六", "周日": "周日",
+  "星期一": "周一", "星期二": "周二", "星期三": "周三", "星期四": "周四",
+  "星期五": "周五", "星期六": "周六", "星期日": "周日",
+};
+
+function normalizeDay(raw: string): string {
+  const key = raw.trim().toLowerCase();
+  return DAY_MAP[key] || raw.slice(0, 3);
+}
+
 export default function CampaignResults({
   campaign,
   campaignId,
@@ -133,8 +148,8 @@ export default function CampaignResults({
           <div className="space-y-3">
             {campaign.thisWeek.map((item, i) => (
               <div key={i} className="flex items-start gap-3">
-                <span className="w-16 shrink-0 rounded-lg bg-green-100 py-1 text-center text-xs font-bold text-green-700 dark:bg-green-900 dark:text-green-300">
-                  {item.day}
+                <span className="inline-block w-10 shrink-0 rounded-lg bg-green-100 py-1 text-center text-xs font-bold text-green-700 dark:bg-green-900 dark:text-green-300">
+                  {normalizeDay(item.day)}
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-green-900 dark:text-green-100">{item.action}</p>

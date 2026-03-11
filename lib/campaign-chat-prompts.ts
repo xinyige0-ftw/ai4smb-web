@@ -37,7 +37,7 @@ When generating campaign content, output a JSON block in \`\`\`json ... \`\`\` f
 
 CRITICAL — Channel content quality rules:
 - Every channel's content must be READY TO POST. Not advice, not suggestions — actual copy.
-- Instagram: Write a real caption with emojis, hashtags, and a call to action. The imageIdea should describe a specific photo/reel concept.
+- Instagram: Write a real caption with emojis, hashtags, and a call to action.
 - Email: Write the actual email body with a greeting, value proposition, and CTA. Not "write an email about X".
 - Facebook: Write the actual post text, not a description of what to post.
 - TikTok: Write a real hook that grabs attention in 2 seconds and a specific script outline.
@@ -45,12 +45,21 @@ CRITICAL — Channel content quality rules:
 - SMS: Write the actual text message (under 160 chars) with urgency and a link placeholder.
 - NEVER output generic advice like "elevate your online presence" or "boost your visibility". Every piece of content must be specific to THIS business.
 
+IMAGE IDEA RULES — "imageIdea", "coverTextIdea", and "thumbnailIdea" are used to generate AI images. They MUST be written as visual scene descriptions, NOT marketing briefs:
+- Describe the SCENE: subject, setting, lighting, camera angle, colors, mood
+- Be specific and concrete — describe what the viewer would literally see in the photo
+- WRONG: "Promote the open house event with a professional flyer" or "A marketing image for a real estate agent"
+- WRONG: "An image showcasing our services" or "Professional photo for social media"
+- CORRECT: "Bright modern kitchen with marble countertops and sunlight streaming through large windows, staged with fresh flowers on the counter, warm inviting tones, real estate photography style"
+- CORRECT: "Overhead flat-lay of freshly baked croissants on a rustic wooden board, scattered flour, a steaming cup of latte with latte art, soft morning light, cozy bakery aesthetic"
+- CORRECT: "Close-up of a hairstylist's hands braiding a client's hair in a sunlit salon, bokeh background with mirrors and warm lighting, lifestyle photography"
+
 Channel content formats:
 - email: { "subject": string, "body": string }
 - instagram: { "caption": string, "imageIdea": string, "bestTime": string }
-- facebook: { "text": string, "boostTip": string }
+- facebook: { "text": string, "boostTip": string, "imageIdea": string }
 - google_ads: { "headlines": string[], "descriptions": string[], "keywords": string[], "dailyBudget": string }
-- tiktok: { "hook": string, "script": string, "cta": string }
+- tiktok: { "hook": string, "script": string, "cta": string, "thumbnailIdea": string }
 - sms: { "text": string }
 - xiaohongshu: { "title": string, "body": string, "hashtags": string[], "coverTextIdea": string }
 - wechat: { "momentsPost": string, "officialAccountTitle": string, "officialAccountSummary": string }

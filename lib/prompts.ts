@@ -132,12 +132,22 @@ Generate a complete campaign brief with:
 Channel content formats (these fields go INSIDE variant_a and variant_b):
 - email: { "subject": string, "body": string }
 - instagram: { "caption": string, "imageIdea": string, "bestTime": string }
-- facebook: { "text": string, "boostTip": string }
+- facebook: { "text": string, "boostTip": string, "imageIdea": string }
 - google_ads: { "headlines": string[], "descriptions": string[], "keywords": string[], "dailyBudget": string }
-- tiktok: { "hook": string, "script": string, "cta": string }
+- tiktok: { "hook": string, "script": string, "cta": string, "thumbnailIdea": string }
 - sms: { "text": string (under 160 chars) }
 - xiaohongshu: { "title": string (note title, ~20 chars, emoji-heavy), "body": string (300-800 chars with line breaks), "hashtags": string[], "coverTextIdea": string, "productTags": string[], "bestTime": string }
 - wechat: { "momentsPost": string (concise, personal tone), "officialAccountTitle": string, "officialAccountSummary": string (~100 chars), "miniProgramCta": string, "bestTime": string }
+
+IMAGE IDEA RULES — "imageIdea", "coverTextIdea", and "thumbnailIdea" are used to generate AI images. They MUST be written as visual scene descriptions, NOT marketing briefs. Follow this format:
+- Describe the SCENE: subject, setting, lighting, camera angle, colors, mood
+- Be specific and concrete — describe what the viewer would literally see in the photo
+- Include the business type and product/service visually
+- WRONG: "Promote the open house event with a professional flyer" or "A marketing image for a real estate agent"
+- WRONG: "An image showcasing our services" or "Professional photo for social media"
+- CORRECT: "Bright modern kitchen with marble countertops and sunlight streaming through large windows, staged with fresh flowers and coffee cups, shot from doorway angle, warm inviting tones"
+- CORRECT: "Overhead flat-lay of freshly baked croissants on a rustic wooden board, scattered flour, a steaming cup of latte with latte art, soft morning light, cozy bakery aesthetic"
+- CORRECT: "Before-and-after split image of a backyard renovation, left side showing overgrown grass, right side showing a beautiful patio with string lights and outdoor furniture at sunset"
 
 Respond ONLY with valid JSON matching this schema:
 {

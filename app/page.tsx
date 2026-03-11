@@ -31,7 +31,7 @@ export default function Home() {
           <div className="mb-4 inline-block rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-xs font-semibold text-blue-700 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-300">
             {t("badge")}
           </div>
-          <h1 className="mb-4 text-4xl font-extrabold leading-tight tracking-tight text-zinc-900 dark:text-zinc-50 sm:text-5xl">
+          <h1 className="mb-4 text-3xl font-extrabold leading-tight tracking-tight text-zinc-900 dark:text-zinc-50 sm:text-5xl">
             {t("heroTitle")}
           </h1>
           <p className="mb-8 text-lg leading-relaxed text-zinc-500 dark:text-zinc-400">
@@ -71,7 +71,7 @@ export default function Home() {
             {/* Segmentation */}
             <a
               href="/segment"
-              className="group flex flex-col rounded-2xl border-2 border-zinc-200 bg-white p-7 transition-all hover:border-blue-400 hover:shadow-lg active:scale-[0.98] dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-blue-500"
+              className="group flex flex-col rounded-2xl border-2 border-zinc-200 bg-white p-5 transition-all hover:border-blue-400 hover:shadow-lg active:scale-[0.98] sm:p-7 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-blue-500"
             >
               <span className="mb-4 text-3xl">🔍</span>
               <h3 className="mb-2 text-xl font-bold text-zinc-900 dark:text-zinc-50">
@@ -94,7 +94,7 @@ export default function Home() {
             {/* Campaign Generator */}
             <a
               href="/generate"
-              className="group flex flex-col rounded-2xl border-2 border-zinc-200 bg-white p-7 transition-all hover:border-blue-400 hover:shadow-lg active:scale-[0.98] dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-blue-500"
+              className="group flex flex-col rounded-2xl border-2 border-zinc-200 bg-white p-5 transition-all hover:border-blue-400 hover:shadow-lg active:scale-[0.98] sm:p-7 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-blue-500"
             >
               <span className="mb-4 text-3xl">📣</span>
               <h3 className="mb-2 text-xl font-bold text-zinc-900 dark:text-zinc-50">

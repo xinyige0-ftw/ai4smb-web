@@ -91,7 +91,7 @@ function TierBadge({ label, value, explain }: { label: string; value?: string; e
   const tip = explain?.[value] || "";
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${TIER_COLORS[value] || TIER_COLORS.medium}`}
+      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${TIER_COLORS[value] || TIER_COLORS.medium}`}
       title={tip}
     >
       {label}: {value}{tip ? ` · ${tip}` : ""}
@@ -117,28 +117,31 @@ function SegmentCard({ segment }: { segment: Segment }) {
   }
 
   return (
-    <div className={`rounded-xl border ${c.border} ${c.bg} p-5`}>
+    <div className={`rounded-xl border ${c.border} ${c.bg} p-4 sm:p-5`}>
       {/* Header */}
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <h3 className={`text-lg font-bold ${c.text}`}>{segment.name}</h3>
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <h3 className={`text-base font-bold sm:text-lg ${c.text}`}>{segment.name}</h3>
           {segment.intent && (
             <p className="mt-0.5 text-xs font-medium text-zinc-500 dark:text-zinc-400 italic">
               {segment.intent}
             </p>
           )}
-          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-            {segment.description}
-          </p>
         </div>
-        <div className="ml-4 flex flex-col items-end gap-1">
-          <div className={`text-2xl font-bold ${c.text}`}>{segment.percentage}%</div>
+        <div className="shrink-0 text-right">
+          <div className={`text-xl font-bold sm:text-2xl ${c.text}`}>{segment.percentage}%</div>
           <div className="text-xs text-zinc-500 dark:text-zinc-400">{t("customers", { size: segment.size })}</div>
-          <div className="flex flex-col gap-1">
-            <TierBadge label={t("propensity")} value={segment.propensityScore} explain={PROPENSITY_EXPLAIN} />
-            <TierBadge label={t("ltv")} value={segment.lifetimeValueTier} explain={LTV_EXPLAIN} />
-          </div>
         </div>
+      </div>
+
+      <p className="mt-1.5 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+        {segment.description}
+      </p>
+
+      {/* Badges — always full width, wrap naturally */}
+      <div className="mt-2 flex flex-wrap gap-1.5">
+        <TierBadge label={t("propensity")} value={segment.propensityScore} explain={PROPENSITY_EXPLAIN} />
+        <TierBadge label={t("ltv")} value={segment.lifetimeValueTier} explain={LTV_EXPLAIN} />
       </div>
 
       {/* Bar */}
@@ -182,7 +185,7 @@ function SegmentCard({ segment }: { segment: Segment }) {
                   {segment.bestChannels.map((ch, i) => (
                     <div key={i} className="flex items-start gap-2 text-sm">
                       <span
-                        className={`mt-0.5 w-7 shrink-0 rounded-full text-center py-0.5 text-[10px] font-bold ${
+                        className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
                           ch.fit === "high"
                             ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
                             : "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300"
@@ -202,7 +205,7 @@ function SegmentCard({ segment }: { segment: Segment }) {
                 <div className="mt-2 space-y-2">
                   {segment.avoidChannels.map((ch, i) => (
                     <div key={i} className="flex items-start gap-2 text-sm">
-                      <span className="mt-0.5 w-7 shrink-0 rounded-full text-center bg-rose-100 py-0.5 text-[10px] font-bold text-rose-700 dark:bg-rose-900 dark:text-rose-300">
+                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rose-100 text-xs font-bold text-rose-700 dark:bg-rose-900 dark:text-rose-300">
                         ✗
                       </span>
                       <div className="min-w-0">
@@ -362,8 +365,8 @@ export default function SegmentResults({
       : null);
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-4 py-8">
-      <h1 className="mb-2 text-center text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+    <div className="mx-auto w-full max-w-2xl px-3 py-6 sm:px-4 sm:py-8">
+      <h1 className="mb-2 text-center text-xl font-bold text-zinc-900 dark:text-zinc-50 sm:text-2xl">
         {t("title")}
       </h1>
       {metaText && (
@@ -371,7 +374,7 @@ export default function SegmentResults({
       )}
 
       {/* Summary */}
-      <div className="my-6 rounded-xl border border-blue-200 bg-blue-50 p-5 dark:border-blue-800 dark:bg-blue-950">
+      <div className="my-4 rounded-xl border border-blue-200 bg-blue-50 p-4 sm:my-6 sm:p-5 dark:border-blue-800 dark:bg-blue-950">
         <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-blue-700 dark:text-blue-300">
           {t("keyInsight")}
         </h2>
@@ -420,7 +423,7 @@ export default function SegmentResults({
 
       {/* Quick wins */}
       {result.quickWins?.length > 0 && (
-        <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-5 dark:border-amber-800 dark:bg-amber-950">
+        <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 sm:mt-6 sm:p-5 dark:border-amber-800 dark:bg-amber-950">
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">
             {t("quickWins")}
           </h2>

@@ -148,7 +148,7 @@ export default function TeachMeMode({ onBack }: { onBack: () => void }) {
             placeholder="Type your answer here..."
             rows={4}
             autoFocus
-            className="flex-1 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm leading-relaxed text-zinc-900 placeholder-zinc-400 focus:border-blue-400 focus:bg-white focus:outline-none dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+            className="flex-1 rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm leading-relaxed text-zinc-900 placeholder-zinc-400 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
             onKeyDown={(e) => {
               if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && canProceed) {
                 handleNext();

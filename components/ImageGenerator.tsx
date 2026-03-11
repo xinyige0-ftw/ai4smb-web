@@ -10,14 +10,18 @@ interface ImageGeneratorProps {
 }
 
 function pollinationsFallbackUrl(prompt: string, w: number, h: number): string {
-  const clean = prompt.slice(0, 400).replace(/[^\w\s,.!?-]/g, " ");
+  const raw = prompt.slice(0, 400).replace(/[^\w\s,.!?-]/g, " ");
+  const looksLikeScene = /\b(photo|shot|image|view|close-?up|flat.?lay|overhead|aerial|bokeh|lighting|angle|style|aesthetic)\b/i.test(raw);
+  const enhanced = looksLikeScene
+    ? `${raw}, high resolution, sharp focus, vibrant colors`
+    : `A photorealistic scene of: ${raw}. Professional photography, natural lighting, sharp detail`;
   const params = new URLSearchParams({
     width: String(Math.min(w, 1024)),
     height: String(Math.min(h, 1024)),
     seed: String(Math.floor(Math.random() * 100000)),
     referrer: "ai4smbhub.com",
   });
-  return `https://image.pollinations.ai/prompt/${encodeURIComponent(clean)}?${params}`;
+  return `https://image.pollinations.ai/prompt/${encodeURIComponent(enhanced)}?${params}`;
 }
 
 export default function ImageGenerator({

@@ -110,8 +110,8 @@ export default function CampaignResults({
   }
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-4 py-8">
-      <h1 className="mb-2 text-center text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+    <div className="mx-auto w-full max-w-2xl px-3 py-6 sm:px-4 sm:py-8">
+      <h1 className="mb-2 text-center text-xl font-bold text-zinc-900 dark:text-zinc-50 sm:text-2xl">
         {t("resultTitle")}
       </h1>
       <p className="mb-6 text-center text-zinc-500 dark:text-zinc-400">
@@ -119,7 +119,7 @@ export default function CampaignResults({
       </p>
 
       {/* Strategy brief */}
-      <div className="mb-6 rounded-xl border border-blue-200 bg-blue-50 p-5 dark:border-blue-800 dark:bg-blue-950">
+      <div className="mb-4 rounded-xl border border-blue-200 bg-blue-50 p-4 sm:mb-6 sm:p-5 dark:border-blue-800 dark:bg-blue-950">
         <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-blue-700 dark:text-blue-300">
           {t("strategy")}
         </h2>
@@ -142,7 +142,7 @@ export default function CampaignResults({
 
       {/* This Week's Action Plan */}
       {campaign.thisWeek && campaign.thisWeek.length > 0 && (
-        <div className="mt-6 rounded-xl border border-green-200 bg-green-50 p-5 dark:border-green-800 dark:bg-green-950">
+        <div className="mt-4 rounded-xl border border-green-200 bg-green-50 p-4 sm:mt-6 sm:p-5 dark:border-green-800 dark:bg-green-950">
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-green-700 dark:text-green-300">
             {t("thisWeekTitle")}
           </h2>

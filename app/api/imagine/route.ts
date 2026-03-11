@@ -69,7 +69,11 @@ export async function POST(req: Request) {
       return Response.json({ error: "Prompt required" }, { status: 400 });
     }
 
-    const enhanced = `${prompt.slice(0, 500)}, professional marketing photo, high quality, clean composition`;
+    const trimmed = prompt.slice(0, 500);
+    const looksLikeScene = /\b(photo|shot|image|view|close-?up|flat.?lay|overhead|aerial|bokeh|lighting|angle|style|aesthetic)\b/i.test(trimmed);
+    const enhanced = looksLikeScene
+      ? `${trimmed}, high resolution, sharp focus, vibrant colors, professional photography`
+      : `A photorealistic scene of: ${trimmed}. Professional photography, natural lighting, sharp detail, clean composition, high quality`;
 
     // Try Hugging Face first (free tier, reliable)
     const hfUrl = await tryHuggingFace(enhanced);

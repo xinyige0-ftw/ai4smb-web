@@ -95,9 +95,9 @@ function renderChannelContent(channel: string, content: Record<string, unknown>,
       return (
         <>
           <ContentBlock label={t("post")} value={String(content.text || "")} {...cp} />
-          {content.text && (
+          {(content.imageIdea || content.text) && (
             <ImageGenerator
-              prompt={`Facebook post image for: ${String(content.text).slice(0, 200)}`}
+              prompt={String(content.imageIdea || content.text || "")}
               width={1200}
               height={630}
               label={t("generateImage")}
@@ -133,9 +133,9 @@ function renderChannelContent(channel: string, content: Record<string, unknown>,
           <ContentBlock label={t("hook")} value={String(content.hook || "")} {...cp} />
           <ContentBlock label={t("script")} value={String(content.script || "")} {...cp} />
           <ContentBlock label={t("callToAction")} value={String(content.cta || "")} {...cp} />
-          {content.hook && (
+          {(content.thumbnailIdea || content.hook) && (
             <ImageGenerator
-              prompt={`TikTok thumbnail: ${String(content.hook)}`}
+              prompt={String(content.thumbnailIdea || content.hook || "")}
               width={1080}
               height={1920}
               label={t("generateThumbnail")}
@@ -215,9 +215,9 @@ export default function ChannelCard({ channel, why, content }: ChannelCardProps)
     : content;
 
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-700 dark:bg-zinc-900">
-      <div className="flex items-center justify-between">
-        <h3 className="flex items-center gap-2 text-lg font-bold text-zinc-900 dark:text-zinc-50">
+    <div className="rounded-xl border border-zinc-200 bg-white p-4 sm:p-5 dark:border-zinc-700 dark:bg-zinc-900">
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="flex items-center gap-2 text-base font-bold text-zinc-900 dark:text-zinc-50 sm:text-lg">
           <span>{info.icon}</span>
           {info.label}
         </h3>

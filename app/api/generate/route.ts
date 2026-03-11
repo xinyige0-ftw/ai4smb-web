@@ -1,6 +1,6 @@
 import Groq from "groq-sdk";
 import { buildPrompt, getSystemPrompt, type GenerateInput } from "@/lib/prompts";
-import { getOrCreateSession, saveCampaign } from "@/lib/supabase";
+import { getOrCreateSession, saveCampaign, extractSessionMeta } from "@/lib/supabase";
 import { getUser } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
 
@@ -53,7 +53,8 @@ export async function POST(req: Request) {
     let savedId: string | null = null;
     if (anonId && anonId !== "unknown") {
       try {
-        const sessionId = await getOrCreateSession(anonId, userId);
+        const meta = extractSessionMeta(req, "campaign", locale);
+        const sessionId = await getOrCreateSession(anonId, userId, meta);
         savedId = await saveCampaign({
           session_id: sessionId,
           business_type: input.businessType,

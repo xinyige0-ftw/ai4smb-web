@@ -1,6 +1,6 @@
 import Groq from "groq-sdk";
 import { buildSegmentPrompt, getSegmentSystemPrompt, type CsvSummary } from "@/lib/segment-prompts";
-import { getOrCreateSession, saveSegment } from "@/lib/supabase";
+import { getOrCreateSession, saveSegment, extractSessionMeta } from "@/lib/supabase";
 import { getUser } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
 import {
@@ -134,7 +134,8 @@ export async function POST(req: Request) {
     if (anonId && anonId !== "unknown") {
       const metaLabel = body.metaLabel as string | undefined;
       try {
-        const sessionId = await getOrCreateSession(anonId, userId);
+        const meta = extractSessionMeta(req, "segment", locale);
+        const sessionId = await getOrCreateSession(anonId, userId, meta);
         savedId = await saveSegment({
           session_id: sessionId,
           mode,

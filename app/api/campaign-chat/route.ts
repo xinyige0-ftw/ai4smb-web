@@ -1,6 +1,7 @@
 import Groq from "groq-sdk";
 import { getChatSystemPrompt } from "@/lib/campaign-chat-prompts";
 import { getUser } from "@/lib/auth";
+import { getOrCreateSession, extractSessionMeta } from "@/lib/supabase";
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY || "" });
 
@@ -23,8 +24,10 @@ export async function POST(req: Request) {
       if (user) userId = user.id;
     } catch {}
 
-    void userId;
-    void anonId;
+    if (anonId && anonId !== "unknown") {
+      const meta = extractSessionMeta(req, "chat", locale);
+      getOrCreateSession(anonId, userId, meta).catch(() => {});
+    }
 
     const completion = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",

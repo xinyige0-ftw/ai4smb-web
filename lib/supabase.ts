@@ -1,6 +1,17 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { createHash } from "crypto";
 
 let _client: SupabaseClient | null = null;
+
+export function extractSessionMeta(req: Request, action: string, locale?: string): SessionMeta {
+  const ua = req.headers.get("user-agent") || undefined;
+  const ref = req.headers.get("referer") || undefined;
+  const forwarded = req.headers.get("x-forwarded-for");
+  const realIp = req.headers.get("x-real-ip");
+  const ip = forwarded?.split(",")[0]?.trim() || realIp || undefined;
+  const ipHash = ip ? createHash("sha256").update(ip + "ai4smb").digest("hex").slice(0, 16) : undefined;
+  return { locale, userAgent: ua, action, referrer: ref, ipHash };
+}
 
 function getClient(): SupabaseClient | null {
   const url = process.env.SUPABASE_URL;
@@ -14,17 +25,32 @@ function getClient(): SupabaseClient | null {
 
 // ─── SESSION HELPERS ──────────────────────────────────────────────
 
-export async function getOrCreateSession(anonId: string, userId?: string): Promise<string | null> {
+export interface SessionMeta {
+  locale?: string;
+  userAgent?: string;
+  action?: string;
+  referrer?: string;
+  ipHash?: string;
+}
+
+export async function getOrCreateSession(
+  anonId: string,
+  userId?: string,
+  meta?: SessionMeta,
+): Promise<string | null> {
   const db = getClient();
   if (!db || !anonId || anonId === "unknown") return null;
 
-  const upsertData: Record<string, string> = {
+  const upsertData: Record<string, unknown> = {
     anon_id: anonId,
     last_seen_at: new Date().toISOString(),
   };
-  if (userId) {
-    upsertData.user_id = userId;
-  }
+  if (userId) upsertData.user_id = userId;
+  if (meta?.locale) upsertData.locale = meta.locale;
+  if (meta?.userAgent) upsertData.user_agent = meta.userAgent;
+  if (meta?.action) upsertData.last_action = meta.action;
+  if (meta?.referrer) upsertData.referrer = meta.referrer;
+  if (meta?.ipHash) upsertData.ip_hash = meta.ipHash;
 
   const { data, error } = await db
     .from("sessions")
@@ -37,7 +63,19 @@ export async function getOrCreateSession(anonId: string, userId?: string): Promi
     return null;
   }
 
-  return data?.id ?? null;
+  const sessionId = data?.id;
+  if (!sessionId) return null;
+
+  // Increment action counters via raw update
+  const action = meta?.action;
+  if (action === "campaign" || action === "segment" || action === "chat") {
+    const col = action === "campaign" ? "campaigns_count"
+      : action === "segment" ? "segments_count"
+      : "chats_count";
+    await db.rpc("increment_counter", { p_id: sessionId, p_col: col }).then(() => {}, () => {});
+  }
+
+  return sessionId;
 }
 
 // ─── CAMPAIGN HELPERS ─────────────────────────────────────────────

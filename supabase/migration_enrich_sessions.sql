@@ -38,6 +38,7 @@ create index if not exists sessions_last_seen_idx on sessions(last_seen_at desc)
 create index if not exists sessions_created_at_idx on sessions(created_at desc);
 
 -- 4. View for quick anonymous user stats
+-- Simple session view
 create or replace view anonymous_activity as
 select
   id,
@@ -58,3 +59,40 @@ select
   case when user_id is not null then 'authenticated' else 'anonymous' end as user_type
 from sessions
 order by last_seen_at desc;
+
+-- Full admin dashboard view: sessions + their reviews + user info
+create or replace view admin_dashboard as
+select
+  s.id as session_id,
+  s.anon_id,
+  s.user_id,
+  u.email,
+  u.full_name,
+  coalesce(s.business_type, u.business_type) as business_type,
+  s.business_name,
+  s.location,
+  s.locale,
+  s.actions_count,
+  s.campaigns_count,
+  s.segments_count,
+  s.chats_count,
+  s.last_action,
+  s.ip_hash,
+  s.created_at as first_seen,
+  s.last_seen_at,
+  case when s.user_id is not null then 'authenticated' else 'anonymous' end as user_type,
+  r.rating as review_rating,
+  r.nps_score as review_nps,
+  r.text as review_text,
+  r.display_name as review_name,
+  r.created_at as review_date
+from sessions s
+left join users u on u.id = s.user_id
+left join lateral (
+  select rating, nps_score, text, display_name, created_at
+  from reviews
+  where reviews.session_id = s.id
+  order by created_at desc
+  limit 1
+) r on true
+order by s.last_seen_at desc;

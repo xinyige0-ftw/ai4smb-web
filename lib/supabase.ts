@@ -31,6 +31,9 @@ export interface SessionMeta {
   action?: string;
   referrer?: string;
   ipHash?: string;
+  businessType?: string;
+  businessName?: string;
+  location?: string;
 }
 
 export async function getOrCreateSession(
@@ -51,6 +54,9 @@ export async function getOrCreateSession(
   if (meta?.action) upsertData.last_action = meta.action;
   if (meta?.referrer) upsertData.referrer = meta.referrer;
   if (meta?.ipHash) upsertData.ip_hash = meta.ipHash;
+  if (meta?.businessType) upsertData.business_type = meta.businessType;
+  if (meta?.businessName) upsertData.business_name = meta.businessName;
+  if (meta?.location) upsertData.location = meta.location;
 
   const { data, error } = await db
     .from("sessions")

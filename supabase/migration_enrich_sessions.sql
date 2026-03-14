@@ -11,6 +11,9 @@ alter table sessions add column if not exists chats_count int default 0;
 alter table sessions add column if not exists last_action text;
 alter table sessions add column if not exists referrer text;
 alter table sessions add column if not exists ip_hash text;
+alter table sessions add column if not exists business_type text;
+alter table sessions add column if not exists business_name text;
+alter table sessions add column if not exists location text;
 
 -- 2. RPC to increment a counter column on sessions
 create or replace function increment_counter(p_id uuid, p_col text)
@@ -40,6 +43,9 @@ select
   id,
   anon_id,
   user_id,
+  business_type,
+  business_name,
+  location,
   locale,
   actions_count,
   campaigns_count,

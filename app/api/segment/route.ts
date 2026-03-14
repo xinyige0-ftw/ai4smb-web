@@ -135,6 +135,16 @@ export async function POST(req: Request) {
       const metaLabel = body.metaLabel as string | undefined;
       try {
         const meta = extractSessionMeta(req, "segment", locale);
+        if (mode === "interview" && body.answers) {
+          meta.businessType = body.answers.businessType;
+          meta.businessName = body.answers.businessName;
+          meta.location = body.answers.location;
+        } else if (mode === "benchmark" && body.input) {
+          meta.businessType = body.input.businessType;
+          meta.location = body.input.location;
+        } else if ((mode === "reviews" || mode === "social") && body.businessType) {
+          meta.businessType = body.businessType;
+        }
         const sessionId = await getOrCreateSession(anonId, userId, meta);
         savedId = await saveSegment({
           session_id: sessionId,

@@ -54,6 +54,9 @@ export async function POST(req: Request) {
     if (anonId && anonId !== "unknown") {
       try {
         const meta = extractSessionMeta(req, "campaign", locale);
+        meta.businessType = input.businessType;
+        meta.businessName = input.businessName;
+        meta.location = input.location;
         const sessionId = await getOrCreateSession(anonId, userId, meta);
         savedId = await saveCampaign({
           session_id: sessionId,

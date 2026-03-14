@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import AuthButton from "@/components/AuthButtonWrapper";
 import LanguageToggle from "@/components/LanguageToggle";
 import GeneratePageClient from "@/components/GeneratePageClient";
+import SignInGate from "@/components/SignInGate";
 
 export const metadata: Metadata = {
   title: "AI Campaign Generator — AI4SMB Insights",
@@ -23,6 +24,7 @@ export default function GeneratePage() {
           </div>
         </div>
       </div>
+      <SignInGate />
       <GeneratePageClient />
     </main>
   );

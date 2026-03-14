@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import SegmentRouter from "@/components/SegmentRouter";
 import AuthButton from "@/components/AuthButtonWrapper";
 import LanguageToggle from "@/components/LanguageToggle";
+import SignInGate from "@/components/SignInGate";
 
 export const metadata: Metadata = {
   title: "Customer Segments — AI4SMB Insights",
@@ -23,6 +24,7 @@ export default function SegmentPage() {
           </div>
         </div>
       </div>
+      <SignInGate />
       <SegmentRouter />
     </main>
   );

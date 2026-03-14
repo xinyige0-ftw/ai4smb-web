@@ -223,7 +223,8 @@
     "noPassword": "No password needed · Your data stays private",
     "checkInbox": "Check your inbox",
     "magicLinkSent": "We sent a magic link to <strong>{email}</strong>. Click the link to sign in.",
-    "gotIt": "Got it, close this"
+    "gotIt": "Got it, close this",
+    "skipForNow": "Continue without signing in"
   },
   "channel": {
     "whyThis": "Why this channel?",

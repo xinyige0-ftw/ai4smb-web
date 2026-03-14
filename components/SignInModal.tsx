@@ -120,6 +120,13 @@ export default function SignInModal({ onClose }: SignInModalProps) {
             <p className="mt-4 text-center text-xs text-zinc-400 dark:text-zinc-500">
               {t("noPassword")}
             </p>
+
+            <button
+              onClick={onClose}
+              className="mt-3 w-full text-center text-xs text-zinc-400 underline underline-offset-2 transition-colors hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
+            >
+              {t("skipForNow")}
+            </button>
           </>
         ) : (
           <div className="text-center">

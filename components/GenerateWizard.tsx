@@ -150,6 +150,19 @@ export default function GenerateWizard() {
             {t("wizardSubtitle")}
           </p>
 
+          <div className="mb-5">
+            <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              {t("locationLabel")} <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              placeholder={t("locationPlaceholder")}
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              className={`w-full rounded-lg border px-4 py-3 text-sm dark:bg-zinc-800 dark:text-zinc-100 ${!location.trim() ? "border-red-300 dark:border-red-700" : "border-zinc-300 dark:border-zinc-600"}`}
+            />
+          </div>
+
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {BUSINESS_TYPES.map((bt) => (
               <button
@@ -179,46 +192,35 @@ export default function GenerateWizard() {
           )}
 
           <div className="mt-4 space-y-2">
-            <input
-              type="text"
-              placeholder={t("locationPlaceholder")}
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              className={`w-full rounded-lg border px-4 py-3 text-sm dark:bg-zinc-800 dark:text-zinc-100 ${!location.trim() ? "border-red-300 dark:border-red-700" : "border-zinc-300 dark:border-zinc-600"}`}
-            />
-          </div>
-
-          {businessType && (
-            <div className="mt-2 space-y-2">
-              {!showName ? (
-                <button
-                  onClick={() => setShowName(true)}
-                  className="w-full text-center text-sm text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
-                >
-                  {t("addBusinessName")}
-                </button>
-              ) : (
-                <input
-                  type="text"
-                  placeholder={t("businessNamePlaceholder")}
-                  value={businessName}
-                  onChange={(e) => setBusinessName(e.target.value)}
-                  className="w-full rounded-lg border border-zinc-300 px-4 py-3 text-sm dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
-                />
-              )}
+            {!showName ? (
               <button
-                onClick={() => {
-                  if (businessType === "other" && !businessTypeCustom.trim()) return;
-                  if (!location.trim()) return;
-                  setStep(2);
-                }}
-                disabled={!location.trim() || (businessType === "other" && !businessTypeCustom.trim())}
-                className="mt-2 w-full rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white disabled:opacity-40"
+                onClick={() => setShowName(true)}
+                className="w-full text-center text-sm text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
               >
-                {t("continue")}
+                {t("addBusinessName")}
               </button>
-            </div>
-          )}
+            ) : (
+              <input
+                type="text"
+                placeholder={t("businessNamePlaceholder")}
+                value={businessName}
+                onChange={(e) => setBusinessName(e.target.value)}
+                className="w-full rounded-lg border border-zinc-300 px-4 py-3 text-sm dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+              />
+            )}
+            <button
+              onClick={() => {
+                if (!businessType) return;
+                if (businessType === "other" && !businessTypeCustom.trim()) return;
+                if (!location.trim()) return;
+                setStep(2);
+              }}
+              disabled={!businessType || !location.trim() || (businessType === "other" && !businessTypeCustom.trim())}
+              className="mt-2 w-full rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white disabled:opacity-40"
+            >
+              {t("continue")}
+            </button>
+          </div>
         </div>
       )}
 

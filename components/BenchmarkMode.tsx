@@ -84,6 +84,19 @@ export default function BenchmarkMode({ onBack }: { onBack: () => void }) {
         {t("disclaimer")}
       </p>
 
+      <div className="mb-5">
+        <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          {t("locationLabel")} <span className="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          placeholder={t("locationPlaceholder")}
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+          className={`w-full rounded-lg border px-4 py-3 text-sm dark:bg-zinc-800 dark:text-zinc-100 ${!location.trim() ? "border-red-300 dark:border-red-700" : "border-zinc-300 dark:border-zinc-600"}`}
+        />
+      </div>
+
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {BUSINESS_TYPES.map((bt) => (
           <button
@@ -96,14 +109,6 @@ export default function BenchmarkMode({ onBack }: { onBack: () => void }) {
           </button>
         ))}
       </div>
-
-      <input
-        type="text"
-        placeholder={t("locationPlaceholder") + " *"}
-        value={location}
-        onChange={(e) => setLocation(e.target.value)}
-        className={`mt-5 w-full rounded-lg border px-4 py-3 text-sm dark:bg-zinc-800 dark:text-zinc-100 ${!location.trim() ? "border-red-300 dark:border-red-700" : "border-zinc-300 dark:border-zinc-600"}`}
-      />
 
       {error && (
         <div className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-900/30 dark:text-red-300">

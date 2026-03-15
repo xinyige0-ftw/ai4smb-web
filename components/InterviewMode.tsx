@@ -120,14 +120,27 @@ export default function InterviewMode({ onBack }: InterviewModeProps) {
           </h1>
           <p className="mb-6 text-center text-zinc-500 dark:text-zinc-400">{t("step1Subtitle")}</p>
 
+          <div className="mb-5">
+            <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              {t("locationLabel")} <span className="text-red-500">*</span>
+            </label>
+            <div className="flex items-center gap-1.5">
+              <input
+                type="text"
+                placeholder={t("locationPlaceholder")}
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className={`min-w-0 flex-1 rounded-lg border px-4 py-3 text-sm dark:bg-zinc-800 dark:text-zinc-100 ${!location.trim() ? "border-red-300 dark:border-red-700" : "border-zinc-300 dark:border-zinc-600"}`}
+              />
+              <VoiceInput onTranscript={(t) => setLocation((v) => v + (v ? " " : "") + t)} />
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {BUSINESS_TYPES.map((bt) => (
               <button
                 key={bt.id}
-                onClick={() => {
-                  setBusinessType(bt.id);
-                  if (bt.id !== "other") setStep(2);
-                }}
+                onClick={() => setBusinessType(bt.id)}
                 className={`flex flex-col items-center gap-1.5 rounded-xl border-2 p-4 text-center transition-all active:scale-95 ${businessType === bt.id ? "border-blue-600 bg-blue-50 dark:bg-blue-950" : "border-zinc-200 bg-white hover:border-zinc-300 dark:border-zinc-700 dark:bg-zinc-900"}`}
               >
                 <span className="text-2xl">{bt.icon}</span>
@@ -149,27 +162,10 @@ export default function InterviewMode({ onBack }: InterviewModeProps) {
                 />
                 <VoiceInput onTranscript={(t) => setBusinessTypeCustom((v) => v + (v ? " " : "") + t)} />
               </div>
-              <button
-                onClick={() => businessTypeCustom.trim() && setStep(2)}
-                disabled={!businessTypeCustom.trim()}
-                className="mt-3 w-full rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white disabled:opacity-40"
-              >
-                Continue
-              </button>
             </div>
           )}
 
-          <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div className="flex items-center gap-1.5">
-              <input
-                type="text"
-                placeholder={t("locationPlaceholder") + " *"}
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                className={`min-w-0 flex-1 rounded-lg border px-4 py-3 text-sm dark:bg-zinc-800 dark:text-zinc-100 ${!location.trim() ? "border-red-300 dark:border-red-700" : "border-zinc-300 dark:border-zinc-600"}`}
-              />
-              <VoiceInput onTranscript={(t) => setLocation((v) => v + (v ? " " : "") + t)} />
-            </div>
+          <div className="mt-4">
             <div className="flex items-center gap-1.5">
               <input
                 type="text"
@@ -182,7 +178,15 @@ export default function InterviewMode({ onBack }: InterviewModeProps) {
             </div>
           </div>
 
-          <button onClick={onBack} className="mt-6 text-sm text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300">
+          <button
+            onClick={() => setStep(2)}
+            disabled={!businessType || !location.trim() || (businessType === "other" && !businessTypeCustom.trim())}
+            className="mt-4 w-full rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white disabled:opacity-40"
+          >
+            {t("continue")}
+          </button>
+
+          <button onClick={onBack} className="mt-4 text-sm text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300">
             {t("backToOptions")}
           </button>
         </div>

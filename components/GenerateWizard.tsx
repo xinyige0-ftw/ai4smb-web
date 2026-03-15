@@ -178,15 +178,18 @@ export default function GenerateWizard() {
             />
           )}
 
+          <div className="mt-4 space-y-2">
+            <input
+              type="text"
+              placeholder={t("locationPlaceholder")}
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              className={`w-full rounded-lg border px-4 py-3 text-sm dark:bg-zinc-800 dark:text-zinc-100 ${!location.trim() ? "border-red-300 dark:border-red-700" : "border-zinc-300 dark:border-zinc-600"}`}
+            />
+          </div>
+
           {businessType && (
-            <div className="mt-4 space-y-2">
-              <input
-                type="text"
-                placeholder={t("locationPlaceholder")}
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                className={`w-full rounded-lg border px-4 py-3 text-sm dark:bg-zinc-800 dark:text-zinc-100 ${!location.trim() ? "border-red-300 dark:border-red-700" : "border-zinc-300 dark:border-zinc-600"}`}
-              />
+            <div className="mt-2 space-y-2">
               {!showName ? (
                 <button
                   onClick={() => setShowName(true)}

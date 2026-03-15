@@ -163,22 +163,22 @@ export default function InterviewMode({ onBack }: InterviewModeProps) {
             <div className="flex items-center gap-1.5">
               <input
                 type="text"
-                placeholder={t("businessNamePlaceholder")}
-                value={businessName}
-                onChange={(e) => setBusinessName(e.target.value)}
-                className="min-w-0 flex-1 rounded-lg border border-zinc-300 px-4 py-3 text-sm dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
-              />
-              <VoiceInput onTranscript={(t) => setBusinessName((v) => v + (v ? " " : "") + t)} />
-            </div>
-            <div className="flex items-center gap-1.5">
-              <input
-                type="text"
                 placeholder={t("locationPlaceholder") + " *"}
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 className={`min-w-0 flex-1 rounded-lg border px-4 py-3 text-sm dark:bg-zinc-800 dark:text-zinc-100 ${!location.trim() ? "border-red-300 dark:border-red-700" : "border-zinc-300 dark:border-zinc-600"}`}
               />
               <VoiceInput onTranscript={(t) => setLocation((v) => v + (v ? " " : "") + t)} />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <input
+                type="text"
+                placeholder={t("businessNamePlaceholder")}
+                value={businessName}
+                onChange={(e) => setBusinessName(e.target.value)}
+                className="min-w-0 flex-1 rounded-lg border border-zinc-300 px-4 py-3 text-sm dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+              />
+              <VoiceInput onTranscript={(t) => setBusinessName((v) => v + (v ? " " : "") + t)} />
             </div>
           </div>
 

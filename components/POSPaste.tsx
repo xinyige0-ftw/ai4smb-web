@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Papa from "papaparse";
 import { summarizeCsv, stripPiiFromSummary } from "@/lib/segment-prompts";
 import SegmentResults from "./SegmentResults";
@@ -19,6 +19,7 @@ interface SegmentData {
 
 export default function POSPaste({ onBack }: { onBack: () => void }) {
   const locale = useLocale();
+  const t = useTranslations("posPaste");
   const [pastedText, setPastedText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -34,13 +35,13 @@ export default function POSPaste({ onBack }: { onBack: () => void }) {
     const parsed = Papa.parse<string[]>(pastedText.trim(), { skipEmptyLines: true });
     const allRows = parsed.data;
     if (allRows.length < 2) {
-      setError("Couldn't detect any rows. Make sure the data has headers in the first row.");
+      setError(t("errorNoRows"));
       return;
     }
     const headers = allRows[0];
     const rows = allRows.slice(1).filter((r) => r.some((c) => c?.trim()));
     if (rows.length === 0) {
-      setError("No data rows found after the header.");
+      setError(t("errorNoData"));
       return;
     }
     setPreviewHeaders(headers);
@@ -67,11 +68,11 @@ export default function POSPaste({ onBack }: { onBack: () => void }) {
         body: JSON.stringify({ anonId, mode: "csv", summary, locale }),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.error || "Something went wrong."); return; }
+      if (!res.ok) { setError(data.error || t("errorGeneric")); return; }
       setResult(data.result);
       setResultId(data.id || null);
     } catch {
-      setError("Network error. Please try again.");
+      setError(t("errorNetwork"));
     } finally {
       setLoading(false);
     }
@@ -83,7 +84,7 @@ export default function POSPaste({ onBack }: { onBack: () => void }) {
         result={result}
         resultId={resultId}
         meta={{ rowCount, columnCount: previewHeaders.length }}
-        metaLabel={`${rowCount} transactions analyzed from your POS data`}
+        metaLabel={t("metaLabel", { count: rowCount })}
         onStartOver={onBack}
         onReanalyze={handleAnalyze}
         loading={loading}
@@ -94,32 +95,27 @@ export default function POSPaste({ onBack }: { onBack: () => void }) {
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-8">
       <h1 className="mb-2 text-center text-2xl font-bold text-zinc-900 dark:text-zinc-50">
-        Paste Transaction Data
+        {t("title")}
       </h1>
       <p className="mb-8 text-center text-zinc-500 dark:text-zinc-400">
-        Copy from Square, Clover, Toast, or any spreadsheet and paste it below
+        {t("subtitle")}
       </p>
 
       {step === "paste" && (
         <>
           {/* How-to */}
           <div className="mb-5 rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-900">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">How to export your data</p>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{t("howToExport")}</p>
             <div className="space-y-1 text-xs text-zinc-600 dark:text-zinc-400">
-              <p>🟦 <strong>Square:</strong> Dashboard → Reports → Transactions → Export → copy the table</p>
-              <p>🟠 <strong>Clover:</strong> Dashboard → Reports → Sales Summary → export CSV</p>
-              <p>📊 <strong>Spreadsheet:</strong> Select your data including headers → Ctrl/Cmd+C → paste below</p>
+              <p>🟦 <strong>Square:</strong> {t("squareSteps")}</p>
+              <p>🟠 <strong>Clover:</strong> {t("cloverSteps")}</p>
+              <p>📊 <strong>{t("spreadsheet")}:</strong> {t("spreadsheetSteps")}</p>
             </div>
           </div>
 
           <div className="flex items-start gap-1.5">
             <textarea
-              placeholder="Paste your transaction data here (with headers in the first row):
-
-Date	Amount	Item	Customer Type
-2026-02-01	$45.00	Coffee + Pastry	Regular
-2026-02-01	$12.50	Latte	New
-2026-02-02	$89.00	Catering Order	Business"
+              placeholder={t("placeholder")}
               value={pastedText}
               onChange={(e) => setPastedText(e.target.value)}
               rows={10}
@@ -135,13 +131,13 @@ Date	Amount	Item	Customer Type
           )}
 
           <div className="mt-4 flex gap-3">
-            <button onClick={onBack} className="rounded-lg border border-zinc-300 px-5 py-3 text-sm font-medium text-zinc-600 dark:border-zinc-600 dark:text-zinc-300">Back</button>
+            <button onClick={onBack} className="rounded-lg border border-zinc-300 px-5 py-3 text-sm font-medium text-zinc-600 dark:border-zinc-600 dark:text-zinc-300">{t("back")}</button>
             <button
               onClick={handleParse}
               disabled={!pastedText.trim()}
               className="flex flex-1 items-center justify-center rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white disabled:opacity-40"
             >
-              Preview data →
+              {t("previewBtn")}
             </button>
           </div>
         </>
@@ -150,7 +146,7 @@ Date	Amount	Item	Customer Type
       {step === "preview" && (
         <>
           <p className="mb-4 text-center text-zinc-500 dark:text-zinc-400">
-            {rowCount} rows detected across {previewHeaders.length} columns
+            {t("rowsDetected", { rows: rowCount, cols: previewHeaders.length })}
           </p>
 
           <div className="overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-700">
@@ -176,7 +172,7 @@ Date	Amount	Item	Customer Type
             </div>
             {rowCount > 5 && (
               <div className="border-t border-zinc-100 bg-zinc-50 px-3 py-2 text-center text-xs text-zinc-400 dark:border-zinc-800 dark:bg-zinc-900">
-                + {rowCount - 5} more rows
+                + {rowCount - 5} {t("moreRows")}
               </div>
             )}
           </div>
@@ -186,15 +182,15 @@ Date	Amount	Item	Customer Type
           )}
 
           <div className="mt-5 flex gap-3">
-            <button onClick={() => setStep("paste")} className="rounded-lg border border-zinc-300 px-5 py-3 text-sm font-medium text-zinc-600 dark:border-zinc-600 dark:text-zinc-300">Back</button>
+            <button onClick={() => setStep("paste")} className="rounded-lg border border-zinc-300 px-5 py-3 text-sm font-medium text-zinc-600 dark:border-zinc-600 dark:text-zinc-300">{t("back")}</button>
             <button
               onClick={handleAnalyze}
               disabled={loading}
               className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white disabled:opacity-40"
             >
               {loading ? (
-                <><span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />Analyzing...</>
-              ) : "Analyze my transactions"}
+                <><span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />{t("analyzing")}</>
+              ) : t("analyzeBtn")}
             </button>
           </div>
         </>

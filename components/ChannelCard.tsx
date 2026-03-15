@@ -4,15 +4,9 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import ImageGenerator from "./ImageGenerator";
 
-const CHANNEL_LABELS: Record<string, { label: string; icon: string }> = {
-  email: { label: "Email", icon: "📧" },
-  instagram: { label: "Instagram", icon: "📸" },
-  facebook: { label: "Facebook", icon: "👍" },
-  google_ads: { label: "Google Ads", icon: "🔍" },
-  tiktok: { label: "TikTok", icon: "🎵" },
-  sms: { label: "SMS", icon: "💬" },
-  xiaohongshu: { label: "小红书 RedNote", icon: "📕" },
-  wechat: { label: "微信 WeChat", icon: "💚" },
+const CHANNEL_ICONS: Record<string, string> = {
+  email: "📧", instagram: "📸", facebook: "👍", google_ads: "🔍",
+  tiktok: "🎵", sms: "💬", xiaohongshu: "📕", wechat: "💚",
 };
 
 function ContentBlock({ label, value, copiedLabel, copyLabel }: { label: string; value: string; copiedLabel: string; copyLabel: string }) {
@@ -207,7 +201,12 @@ export default function ChannelCard({ channel, why, content }: ChannelCardProps)
   const t = useTranslations("channel");
   const [showWhy, setShowWhy] = useState(false);
   const [activeVariant, setActiveVariant] = useState<"a" | "b">("a");
-  const info = CHANNEL_LABELS[channel] || { label: channel, icon: "📢" };
+  const LABEL_KEYS: Record<string, string> = {
+    email: "chEmail", instagram: "chInstagram", facebook: "chFacebook",
+    google_ads: "chGoogleAds", tiktok: "chTiktok", sms: "chSms",
+    xiaohongshu: "chXiaohongshu", wechat: "chWechat",
+  };
+  const info = { label: LABEL_KEYS[channel] ? t(LABEL_KEYS[channel]) : channel, icon: CHANNEL_ICONS[channel] || "📢" };
 
   const variants = hasVariants(content);
   const displayContent = variants

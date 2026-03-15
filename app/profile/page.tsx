@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import AuthButton from "@/components/AuthButtonWrapper";
 import LanguageToggle from "@/components/LanguageToggle";
 
@@ -55,6 +56,7 @@ const TONES = [
 ] as const;
 
 export default function ProfilePage() {
+  const tc = useTranslations("common");
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -130,9 +132,9 @@ export default function ProfilePage() {
             AI4SMB Insights
           </a>
           <div className="flex items-center gap-3">
-            <a href="/segment" className="text-xs text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200">Segments</a>
-            <a href="/generate" className="text-xs text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200">Campaigns</a>
-            <a href="/history" className="text-xs text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200">History</a>
+            <a href="/segment" className="text-xs text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200">{tc("segments")}</a>
+            <a href="/generate" className="text-xs text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200">{tc("campaigns")}</a>
+            <a href="/history" className="text-xs text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200">{tc("history")}</a>
             <LanguageToggle />
             <AuthButton />
           </div>

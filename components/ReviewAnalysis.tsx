@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { BUSINESS_TYPES } from "@/lib/prompts";
 import SegmentResults from "./SegmentResults";
 import VoiceInput from "./VoiceInput";
@@ -33,6 +33,8 @@ interface PlaceReview {
 
 export default function ReviewAnalysis({ onBack }: { onBack: () => void }) {
   const locale = useLocale();
+  const t = useTranslations("reviewAnalysis");
+  const tb = useTranslations("businesses");
   const [reviewText, setReviewText] = useState("");
   const [businessType, setBusinessType] = useState("");
   const [loading, setLoading] = useState(false);
@@ -85,10 +87,10 @@ export default function ReviewAnalysis({ onBack }: { onBack: () => void }) {
           .join("\n\n");
         setReviewText(formatted);
       } else {
-        setError("No reviews found for this business.");
+        setError(t("errorNoReviews"));
       }
     } catch {
-      setError("Failed to fetch reviews. You can still paste them manually.");
+      setError(t("errorFetchFailed"));
     }
     setFetchingReviews(false);
   }
@@ -115,11 +117,11 @@ export default function ReviewAnalysis({ onBack }: { onBack: () => void }) {
         }),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.error || "Something went wrong."); return; }
+      if (!res.ok) { setError(data.error || t("errorGeneric")); return; }
       setResult(data.result);
       setResultId(data.id || null);
     } catch {
-      setError("Network error. Please try again.");
+      setError(t("errorNetwork"));
     } finally {
       setLoading(false);
     }
@@ -131,7 +133,7 @@ export default function ReviewAnalysis({ onBack }: { onBack: () => void }) {
         result={result}
         resultId={resultId}
         meta={{ rowCount: 0, columnCount: 0 }}
-        metaLabel="Based on your customer reviews"
+        metaLabel={t("metaLabel")}
         onStartOver={onBack}
         onReanalyze={handleAnalyze}
         loading={loading}
@@ -142,23 +144,23 @@ export default function ReviewAnalysis({ onBack }: { onBack: () => void }) {
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-8">
       <h1 className="mb-2 text-center text-2xl font-bold text-zinc-900 dark:text-zinc-50">
-        Analyze Your Reviews
+        {t("title")}
       </h1>
       <p className="mb-8 text-center text-zinc-500 dark:text-zinc-400">
-        Paste your Google or Yelp reviews — the AI finds patterns in what customers say
+        {t("subtitle")}
       </p>
 
       {/* Google Places search */}
       <div className="mb-5 rounded-xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950">
         <p className="mb-2 text-sm font-semibold text-blue-800 dark:text-blue-200">
-          🔍 Find your business on Google
+          🔍 {t("findBusiness")}
         </p>
         <div className="relative">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => handleSearchInput(e.target.value)}
-            placeholder="Type your business name and city..."
+            placeholder={t("searchPlaceholder")}
             className="w-full rounded-lg border border-blue-200 bg-white px-4 py-2.5 text-sm text-zinc-900 placeholder-zinc-400 outline-none transition-colors focus:border-blue-400 focus:ring-1 focus:ring-blue-400 dark:border-blue-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder-zinc-500"
           />
           {searching && (
@@ -187,28 +189,23 @@ export default function ReviewAnalysis({ onBack }: { onBack: () => void }) {
         {fetchingReviews && (
           <div className="mt-3 flex items-center gap-2 text-sm text-blue-600 dark:text-blue-300">
             <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-blue-400 border-t-transparent" />
-            Pulling reviews from Google...
+            {t("pullingReviews")}
           </div>
         )}
         {selectedPlace && !fetchingReviews && reviewText && (
           <div className="mt-3 flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
-            ✓ Found {reviewText.split("\n\n").length} reviews for {selectedPlace.name}
+            ✓ {t("foundReviews", { count: reviewText.split("\n\n").length, name: selectedPlace.name })}
           </div>
         )}
         <p className="mt-2 text-xs text-blue-600/70 dark:text-blue-400/70">
-          We&apos;ll pull your latest Google reviews automatically. Paste more below for deeper insights.
+          {t("autoPullNote")}
         </p>
       </div>
 
       {/* Manual paste fallback */}
       <div className="flex items-start gap-1.5">
         <textarea
-          placeholder="Reviews will appear here after searching, or paste manually...
-
-Example:
-★★★★★ 'Best coffee in the neighborhood! The baristas remember my order.'
-
-★★★★☆ 'Quick stop on my work commute. Usually grab a latte and a croissant.'"
+          placeholder={t("textPlaceholder")}
           value={reviewText}
           onChange={(e) => setReviewText(e.target.value)}
           rows={10}
@@ -217,13 +214,13 @@ Example:
         <VoiceInput onTranscript={(t) => setReviewText((v) => v + (v ? " " : "") + t)} className="mt-1" />
       </div>
       <p className="mt-1 text-right text-xs text-zinc-400">
-        {reviewText.length} characters {reviewText.length > 8000 && "· extra text will be trimmed"}
+        {reviewText.length} {t("characters")} {reviewText.length > 8000 && t("willTrim")}
       </p>
 
       {/* Optional business type */}
       <div className="mt-4">
         <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-          Business type (optional — helps with context)
+          {t("businessTypeLabel")}
         </label>
         <div className="flex flex-wrap gap-2">
           {BUSINESS_TYPES.filter(b => b.id !== "other").map((bt) => (
@@ -232,7 +229,7 @@ Example:
               onClick={() => setBusinessType(businessType === bt.id ? "" : bt.id)}
               className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${businessType === bt.id ? "border-blue-600 bg-blue-600 text-white" : "border-zinc-300 text-zinc-600 hover:border-zinc-400 dark:border-zinc-600 dark:text-zinc-300"}`}
             >
-              {bt.icon} {bt.label}
+              {bt.icon} {tb(bt.id)}
             </button>
           ))}
         </div>
@@ -249,7 +246,7 @@ Example:
           onClick={onBack}
           className="rounded-lg border border-zinc-300 px-5 py-3 text-sm font-medium text-zinc-600 dark:border-zinc-600 dark:text-zinc-300"
         >
-          Back
+          {t("back")}
         </button>
         <button
           onClick={handleAnalyze}
@@ -257,8 +254,8 @@ Example:
           className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-700 disabled:opacity-40"
         >
           {loading ? (
-            <><span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />Analyzing reviews...</>
-          ) : "Analyze my reviews"}
+            <><span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />{t("analyzing")}</>
+          ) : t("analyzeBtn")}
         </button>
       </div>
     </div>

@@ -5,14 +5,14 @@ import { useTranslations } from "next-intl";
 import SegmentResults from "./SegmentResults";
 import CampaignResults from "./CampaignResults";
 
-const MODE_LABELS: Record<string, string> = {
-  csv: "CSV upload",
-  interview: "Interview",
-  benchmark: "Benchmark",
-  reviews: "Review analysis",
-  pos: "POS data",
-  social: "Social audience",
-  teachme: "Guide me",
+const MODE_LABEL_KEYS: Record<string, string> = {
+  csv: "modeCsv",
+  interview: "modeInterview",
+  benchmark: "modeBenchmark",
+  reviews: "modeReviews",
+  pos: "modePos",
+  social: "modeSocial",
+  teachme: "modeTeachme",
 };
 
 interface CampaignItem {
@@ -34,14 +34,14 @@ interface SegmentItem {
   result: object;
 }
 
-function timeAgo(dateStr: string): string {
+function timeAgo(dateStr: string, t: (k: string, v?: Record<string, number>) => string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 1) return t("justNow");
+  if (mins < 60) return t("minsAgo", { n: mins });
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  return `${Math.floor(hrs / 24)}d ago`;
+  if (hrs < 24) return t("hrsAgo", { n: hrs });
+  return t("daysAgo", { n: Math.floor(hrs / 24) });
 }
 
 export default function HistoryView() {
@@ -103,7 +103,7 @@ export default function HistoryView() {
         result={activeSegment.result as Parameters<typeof SegmentResults>[0]["result"]}
         resultId={activeSegment.id}
         meta={{ rowCount: 0, columnCount: 0 }}
-        metaLabel={activeSegment.meta_label || MODE_LABELS[activeSegment.mode] || activeSegment.mode}
+        metaLabel={activeSegment.meta_label || (MODE_LABEL_KEYS[activeSegment.mode] ? t(MODE_LABEL_KEYS[activeSegment.mode]) : activeSegment.mode)}
         onStartOver={() => setActiveSegment(null)}
         onReanalyze={() => {}}
         loading={false}
@@ -136,7 +136,7 @@ export default function HistoryView() {
       </div>
 
       {loading && (
-        <div className="py-16 text-center text-sm text-zinc-400">Loading your history...</div>
+        <div className="py-16 text-center text-sm text-zinc-400">{t("loading")}</div>
       )}
 
       {empty && !loading && (
@@ -173,13 +173,13 @@ export default function HistoryView() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 truncate">
-                      {seg.name || seg.meta_label || MODE_LABELS[seg.mode] || "Customer Segments"}
+                      {seg.name || seg.meta_label || (MODE_LABEL_KEYS[seg.mode] ? t(MODE_LABEL_KEYS[seg.mode]) : t("fallbackSegment"))}
                     </span>
                     <span className="shrink-0 rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
-                      {MODE_LABELS[seg.mode] || seg.mode}
+                      {MODE_LABEL_KEYS[seg.mode] ? t(MODE_LABEL_KEYS[seg.mode]) : seg.mode}
                     </span>
                   </div>
-                  <p className="mt-0.5 text-xs text-zinc-400">{timeAgo(seg.created_at)}</p>
+                  <p className="mt-0.5 text-xs text-zinc-400">{timeAgo(seg.created_at, t)}</p>
                 </div>
                 <span className="mt-1 text-zinc-300 group-hover:text-blue-500 dark:text-zinc-600">→</span>
               </button>
@@ -187,7 +187,7 @@ export default function HistoryView() {
                 onClick={() => handleDelete(seg.id, "segment")}
                 disabled={deleting === seg.id}
                 className="absolute top-2 right-2 rounded-md p-1.5 text-zinc-300 opacity-0 transition-all hover:text-red-500 group-hover:opacity-100 dark:text-zinc-600 dark:hover:text-red-400"
-                title="Delete"
+                title={t("delete")}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
               </button>
@@ -212,7 +212,7 @@ export default function HistoryView() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 truncate">
-                      {camp.name || camp.business_name || camp.business_type || "Campaign"}
+                      {camp.name || camp.business_name || camp.business_type || t("fallbackCampaign")}
                     </span>
                     {camp.goal && (
                       <span className="shrink-0 rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400 capitalize">
@@ -220,7 +220,7 @@ export default function HistoryView() {
                       </span>
                     )}
                   </div>
-                  <p className="mt-0.5 text-xs text-zinc-400">{timeAgo(camp.created_at)}</p>
+                  <p className="mt-0.5 text-xs text-zinc-400">{timeAgo(camp.created_at, t)}</p>
                 </div>
                 <span className="mt-1 text-zinc-300 group-hover:text-blue-500 dark:text-zinc-600">→</span>
               </button>
@@ -228,7 +228,7 @@ export default function HistoryView() {
                 onClick={() => handleDelete(camp.id, "campaign")}
                 disabled={deleting === camp.id}
                 className="absolute top-2 right-2 rounded-md p-1.5 text-zinc-300 opacity-0 transition-all hover:text-red-500 group-hover:opacity-100 dark:text-zinc-600 dark:hover:text-red-400"
-                title="Delete"
+                title={t("delete")}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
               </button>

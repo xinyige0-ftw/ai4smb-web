@@ -1,5 +1,6 @@
 "use client";
 import { useState, useRef, useCallback, useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 interface VoiceInputProps {
   onTranscript: (text: string) => void;
@@ -13,6 +14,7 @@ function getSR() {
 }
 
 export default function VoiceInput({ onTranscript, className = "" }: VoiceInputProps) {
+  const t = useTranslations("chat");
   const [supported, setSupported] = useState(false);
   const [listening, setListening] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -55,7 +57,7 @@ export default function VoiceInput({ onTranscript, className = "" }: VoiceInputP
     <button
       type="button"
       onClick={toggle}
-      title={listening ? "Stop listening" : "Voice input"}
+      title={listening ? t("stopListening") : t("voiceInput")}
       className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border transition-all ${
         listening
           ? "animate-pulse border-red-400 bg-red-50 text-red-600 dark:border-red-600 dark:bg-red-950 dark:text-red-400"

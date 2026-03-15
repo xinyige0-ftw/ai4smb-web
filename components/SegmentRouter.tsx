@@ -90,7 +90,7 @@ export default function SegmentRouter() {
   if (mode === "ask")
     return (
       <SubChoice
-        title="How would you like to start?"
+        title={t("subAskTitle")}
         options={askOptions}
         onSelect={setMode}
         onBack={back}
@@ -99,7 +99,7 @@ export default function SegmentRouter() {
   if (mode === "data")
     return (
       <SubChoice
-        title="What kind of data do you have?"
+        title={t("subDataTitle")}
         options={dataOptions}
         onSelect={setMode}
         onBack={back}
@@ -108,7 +108,7 @@ export default function SegmentRouter() {
   if (mode === "text")
     return (
       <SubChoice
-        title="What would you like to analyze?"
+        title={t("subTextTitle")}
         options={textOptions}
         onSelect={setMode}
         onBack={back}

@@ -20,7 +20,6 @@ interface ModeCard {
   titleKey: string;
   descKey: string;
   badgeKey?: string;
-  badge?: string;
 }
 
 const MODES: ModeCard[] = [
@@ -36,14 +35,14 @@ const MODES: ModeCard[] = [
     icon: "📊",
     titleKey: "dataTitle",
     descKey: "dataDesc",
-    badge: "CSV, POS, CRM",
+    badgeKey: "dataBadge",
   },
   {
     id: "text",
     icon: "⭐",
     titleKey: "textTitle",
     descKey: "textDesc",
-    badge: "Google, Yelp, social",
+    badgeKey: "textBadge",
   },
 ];
 
@@ -76,9 +75,9 @@ export default function SegmentHub({ onSelect }: SegmentHubProps) {
                 <span className="text-sm font-bold text-zinc-900 dark:text-zinc-50">
                   {t(mode.titleKey)}
                 </span>
-                {(mode.badgeKey || mode.badge) && (
+                {mode.badgeKey && (
                   <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-900 dark:text-blue-200">
-                    {mode.badgeKey ? t(mode.badgeKey) : mode.badge}
+                    {t(mode.badgeKey)}
                   </span>
                 )}
               </div>

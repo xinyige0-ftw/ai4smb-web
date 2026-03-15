@@ -279,7 +279,7 @@ export default function CampaignChat({ onBack }: CampaignChatProps) {
             onClick={copyContent}
             className="ml-auto rounded-md border border-zinc-200 bg-white px-2.5 py-1 text-xs font-medium text-zinc-600 transition hover:border-blue-400 hover:text-blue-600 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-blue-500 dark:hover:text-blue-400"
           >
-            {copied ? "✓ Copied" : "Copy"}
+            {copied ? t("copied") : t("copy")}
           </button>
         </div>
         <div className="px-4 py-3">
@@ -303,7 +303,7 @@ export default function CampaignChat({ onBack }: CampaignChatProps) {
               prompt={asset.title + ": " + asset.content.slice(0, 300)}
               width={asset.assetType === "flyer" ? 1080 : 1080}
               height={asset.assetType === "flyer" ? 1440 : 1080}
-              label={locale === "zh" ? "生成图片" : "Generate image"}
+              label={t("generateImage")}
             />
           )}
         </div>
@@ -399,7 +399,7 @@ export default function CampaignChat({ onBack }: CampaignChatProps) {
         <div className="border-t border-zinc-200 dark:border-zinc-700">
           <CampaignResults
             campaign={campaign}
-            onRegenerate={() => sendMessage("Regenerate the entire campaign")}
+            onRegenerate={() => sendMessage(t("regeneratePrompt"))}
             onStartOver={() => {
               setCampaign(null);
               setAssets([]);

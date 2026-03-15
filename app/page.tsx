@@ -138,7 +138,7 @@ export default function Home() {
                   {icon}
                 </div>
                 <div className="mb-1 text-xs font-bold uppercase tracking-widest text-blue-500">
-                  Step {step}
+                  {t("stepLabel", { step })}
                 </div>
                 <h3 className="mb-2 text-base font-bold text-zinc-900 dark:text-zinc-50">
                   {title}

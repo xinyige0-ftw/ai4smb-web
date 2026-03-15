@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 interface ImageGeneratorProps {
   prompt: string;
@@ -28,8 +29,10 @@ export default function ImageGenerator({
   prompt,
   width = 1024,
   height = 1024,
-  label = "Generate image",
+  label,
 }: ImageGeneratorProps) {
+  const t = useTranslations("imageGen");
+  const displayLabel = label || t("generate");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -66,7 +69,7 @@ export default function ImageGenerator({
       });
       setImageUrl(fallback);
     } catch {
-      setError("Image generation is temporarily unavailable. Try again shortly.");
+      setError(t("unavailable"));
     } finally {
       setLoading(false);
     }
@@ -88,20 +91,20 @@ export default function ImageGenerator({
       <div className="mt-3">
         <div className="overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={imageUrl} alt="AI-generated marketing image" className="w-full" />
+          <img src={imageUrl} alt={t("altText")} className="w-full" />
         </div>
         <div className="mt-2 flex gap-2">
           <button
             onClick={download}
             className="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
           >
-            ⬇ Download
+            ⬇ {t("download")}
           </button>
           <button
             onClick={generate}
             className="rounded-md border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-600 hover:border-blue-400 hover:text-blue-600 dark:border-zinc-600 dark:text-zinc-300"
           >
-            🔄 Regenerate
+            🔄 {t("regenerate")}
           </button>
         </div>
       </div>
@@ -118,10 +121,10 @@ export default function ImageGenerator({
         {loading ? (
           <>
             <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-blue-400 border-t-transparent" />
-            Generating...
+            {t("generating")}
           </>
         ) : (
-          <>🎨 {label}</>
+          <>🎨 {displayLabel}</>
         )}
       </button>
       {error && (
@@ -131,7 +134,7 @@ export default function ImageGenerator({
             onClick={generate}
             className="text-xs font-medium text-blue-600 hover:text-blue-700"
           >
-            Retry
+            {t("retry")}
           </button>
         </div>
       )}

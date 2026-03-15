@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Papa from "papaparse";
 import SegmentResults from "./SegmentResults";
 import { SAMPLE_HEADERS, SAMPLE_ROWS } from "@/lib/sample-data";
@@ -24,6 +24,7 @@ interface SegmentData {
 
 export default function SegmentWizard({ onBack }: { onBack?: () => void } = {}) {
   const locale = useLocale();
+  const t = useTranslations("csvUpload");
   const [step, setStep] = useState<"upload" | "preview" | "results">("upload");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -50,12 +51,12 @@ export default function SegmentWizard({ onBack }: { onBack?: () => void } = {}) 
         const csvRows = allRows.slice(1).filter((r) => r.some((cell) => cell?.trim()));
 
         if (!csvHeaders?.length || csvRows.length === 0) {
-          setError("Could not parse any data from this file. Make sure it's a valid CSV.");
+          setError(t("errorParse"));
           return;
         }
 
         if (csvRows.length > 10000) {
-          setError("File has more than 10,000 rows. Please use a smaller dataset.");
+          setError(t("errorTooMany"));
           return;
         }
 
@@ -64,7 +65,7 @@ export default function SegmentWizard({ onBack }: { onBack?: () => void } = {}) 
         setStep("preview");
       },
       error() {
-        setError("Failed to parse the file. Make sure it's a valid CSV.");
+        setError(t("errorParseFailed"));
       },
     });
   }, []);
@@ -76,7 +77,7 @@ export default function SegmentWizard({ onBack }: { onBack?: () => void } = {}) 
     if (file && (file.name.endsWith(".csv") || file.type === "text/csv")) {
       parseCsv(file);
     } else {
-      setError("Please upload a .csv file.");
+      setError(t("errorNotCsv"));
     }
   }
 
@@ -115,7 +116,7 @@ export default function SegmentWizard({ onBack }: { onBack?: () => void } = {}) 
 
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "Something went wrong.");
+        setError(data.error || t("errorGeneric"));
         return;
       }
       setResult(data.result);
@@ -123,7 +124,7 @@ export default function SegmentWizard({ onBack }: { onBack?: () => void } = {}) 
       setMeta(data.meta);
       setStep("results");
     } catch {
-      setError("Network error. Please try again.");
+      setError(t("errorNetwork"));
     } finally {
       setLoading(false);
     }
@@ -161,14 +162,14 @@ export default function SegmentWizard({ onBack }: { onBack?: () => void } = {}) 
         <div>
           {onBack && (
             <button onClick={onBack} className="mb-4 flex items-center gap-1 text-sm text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300">
-              ← All analysis methods
+              {t("backToAll")}
             </button>
           )}
           <h1 className="mb-2 text-center text-2xl font-bold text-zinc-900 dark:text-zinc-50">
-            Upload Customer Data
+            {t("title")}
           </h1>
           <p className="mb-8 text-center text-zinc-500 dark:text-zinc-400">
-            Upload a CSV of your customer data and AI will find your audience segments
+            {t("subtitle")}
           </p>
 
           {/* Drop zone */}
@@ -188,10 +189,10 @@ export default function SegmentWizard({ onBack }: { onBack?: () => void } = {}) 
           >
             <div className="mb-3 text-4xl">📊</div>
             <p className="mb-1 text-sm font-semibold text-zinc-700 dark:text-zinc-300">
-              Drop your CSV here or click to browse
+              {t("dropZone")}
             </p>
             <p className="text-xs text-zinc-400 dark:text-zinc-500">
-              Customer data, sales export, email list — any CSV works
+              {t("dropZoneHint")}
             </p>
             <input
               ref={fileInputRef}
@@ -204,27 +205,27 @@ export default function SegmentWizard({ onBack }: { onBack?: () => void } = {}) 
 
           {/* Sample data CTA */}
           <div className="mt-6 text-center">
-            <span className="text-sm text-zinc-400 dark:text-zinc-500">No data handy? </span>
+            <span className="text-sm text-zinc-400 dark:text-zinc-500">{t("noData")} </span>
             <button
               onClick={loadSampleData}
               className="text-sm font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400"
             >
-              Try with sample coffee shop data
+              {t("trySample")}
             </button>
           </div>
 
           {/* What data works */}
           <div className="mt-8 rounded-xl border border-zinc-200 bg-zinc-50 p-5 dark:border-zinc-700 dark:bg-zinc-900">
             <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-              What kind of data works?
+              {t("whatWorks")}
             </h3>
             <div className="grid grid-cols-2 gap-2 text-sm text-zinc-600 dark:text-zinc-400">
-              <div className="flex items-center gap-2"><span>✓</span> Customer lists</div>
-              <div className="flex items-center gap-2"><span>✓</span> Sales/order exports</div>
-              <div className="flex items-center gap-2"><span>✓</span> Email subscriber lists</div>
-              <div className="flex items-center gap-2"><span>✓</span> POS transaction data</div>
-              <div className="flex items-center gap-2"><span>✓</span> CRM exports</div>
-              <div className="flex items-center gap-2"><span>✓</span> Any CSV with customer info</div>
+              <div className="flex items-center gap-2"><span>✓</span> {t("d1")}</div>
+              <div className="flex items-center gap-2"><span>✓</span> {t("d2")}</div>
+              <div className="flex items-center gap-2"><span>✓</span> {t("d3")}</div>
+              <div className="flex items-center gap-2"><span>✓</span> {t("d4")}</div>
+              <div className="flex items-center gap-2"><span>✓</span> {t("d5")}</div>
+              <div className="flex items-center gap-2"><span>✓</span> {t("d6")}</div>
             </div>
           </div>
 
@@ -232,7 +233,7 @@ export default function SegmentWizard({ onBack }: { onBack?: () => void } = {}) 
           <div className="mt-4 flex items-start gap-2 rounded-lg bg-green-50 px-4 py-3 dark:bg-green-950">
             <span className="mt-0.5 text-sm">🔒</span>
             <p className="text-xs leading-relaxed text-green-800 dark:text-green-200">
-              <strong>Your data stays private.</strong> Files are processed entirely in your browser. Only anonymous statistics and a small sample (with names and emails removed) are sent for AI analysis. Nothing is stored.
+              <strong>{t("privacyBold")}</strong> {t("privacyDesc")}
             </p>
           </div>
 
@@ -248,7 +249,7 @@ export default function SegmentWizard({ onBack }: { onBack?: () => void } = {}) 
       {step === "preview" && (
         <div>
           <h1 className="mb-2 text-center text-2xl font-bold text-zinc-900 dark:text-zinc-50">
-            Preview Your Data
+            {t("previewTitle")}
           </h1>
           <p className="mb-6 text-center text-zinc-500 dark:text-zinc-400">
             {fileName} — {rows.length} rows, {headers.length} columns
@@ -282,7 +283,7 @@ export default function SegmentWizard({ onBack }: { onBack?: () => void } = {}) 
             </div>
             {rows.length > 5 && (
               <div className="border-t border-zinc-100 bg-zinc-50 px-3 py-2 text-center text-xs text-zinc-400 dark:border-zinc-800 dark:bg-zinc-900">
-                + {rows.length - 5} more rows
+                + {rows.length - 5} {t("moreRows")}
               </div>
             )}
           </div>
@@ -290,11 +291,11 @@ export default function SegmentWizard({ onBack }: { onBack?: () => void } = {}) 
           {/* Business context (optional) */}
           <div className="mt-5">
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-              Business context (optional)
+              {t("contextLabel")}
             </label>
             <input
               type="text"
-              placeholder="e.g. We're a coffee shop in Austin, TX"
+              placeholder={t("contextPlaceholder")}
               value={businessContext}
               onChange={(e) => setBusinessContext(e.target.value)}
               className="w-full rounded-lg border border-zinc-300 px-4 py-3 text-sm dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
@@ -313,7 +314,7 @@ export default function SegmentWizard({ onBack }: { onBack?: () => void } = {}) 
               onClick={handleStartOver}
               className="rounded-lg border border-zinc-300 px-5 py-3 text-sm font-medium text-zinc-600 dark:border-zinc-600 dark:text-zinc-300"
             >
-              Back
+              {t("back")}
             </button>
             <button
               onClick={handleAnalyze}
@@ -323,10 +324,10 @@ export default function SegmentWizard({ onBack }: { onBack?: () => void } = {}) 
               {loading ? (
                 <>
                   <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  Analyzing...
+                  {t("analyzing")}
                 </>
               ) : (
-                "Analyze my customers"
+                t("analyzeBtn")
               )}
             </button>
           </div>

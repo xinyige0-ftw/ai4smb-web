@@ -74,21 +74,12 @@ const TIER_COLORS: Record<string, string> = {
   low: "bg-rose-100 text-rose-700 dark:bg-rose-900 dark:text-rose-300",
 };
 
-const PROPENSITY_EXPLAIN: Record<string, string> = {
-  high: "Very likely to buy",
-  medium: "May need a nudge",
-  low: "Harder to convert",
-};
+const PROPENSITY_KEYS: Record<string, string> = { high: "propHigh", medium: "propMed", low: "propLow" };
+const LTV_KEYS: Record<string, string> = { high: "ltvHigh", medium: "ltvMed", low: "ltvLow" };
 
-const LTV_EXPLAIN: Record<string, string> = {
-  high: "Big spenders",
-  medium: "Average spend",
-  low: "Budget-conscious",
-};
-
-function TierBadge({ label, value, explain }: { label: string; value?: string; explain?: Record<string, string> }) {
+function TierBadge({ label, value, tipKey, t }: { label: string; value?: string; tipKey?: Record<string, string>; t: (k: string) => string }) {
   if (!value) return null;
-  const tip = explain?.[value] || "";
+  const tip = tipKey?.[value] ? t(tipKey[value]) : "";
   return (
     <span
       className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${TIER_COLORS[value] || TIER_COLORS.medium}`}
@@ -140,8 +131,8 @@ function SegmentCard({ segment }: { segment: Segment }) {
 
       {/* Badges — always full width, wrap naturally */}
       <div className="mt-2 flex flex-wrap gap-1.5">
-        <TierBadge label={t("propensity")} value={segment.propensityScore} explain={PROPENSITY_EXPLAIN} />
-        <TierBadge label={t("ltv")} value={segment.lifetimeValueTier} explain={LTV_EXPLAIN} />
+        <TierBadge label={t("propensity")} value={segment.propensityScore} tipKey={PROPENSITY_KEYS} t={t} />
+        <TierBadge label={t("ltv")} value={segment.lifetimeValueTier} tipKey={LTV_KEYS} t={t} />
       </div>
 
       {/* Bar */}
@@ -169,7 +160,7 @@ function SegmentCard({ segment }: { segment: Segment }) {
         onClick={() => setExpanded(!expanded)}
         className={`mt-3 flex items-center gap-1 text-xs font-semibold ${c.text}`}
       >
-        {expanded ? "▾ Less detail" : "▸ Channels, messaging & recommendations"}
+        {expanded ? t("lessDetail") : t("moreDetail")}
       </button>
 
       {expanded && (

@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { TEACH_ME_QUESTIONS, type TeachMeQA } from "@/lib/insight-prompts";
+
+const Q_KEYS = ["q1", "q2", "q3", "q4", "q5"] as const;
 import SegmentResults from "./SegmentResults";
 import VoiceInput from "./VoiceInput";
 
@@ -18,15 +20,17 @@ interface SegmentData {
 
 export default function TeachMeMode({ onBack }: { onBack: () => void }) {
   const locale = useLocale();
+  const t = useTranslations("teachMe");
+  const questions = Q_KEYS.map((k) => t(k));
   const [currentQ, setCurrentQ] = useState(0);
-  const [answers, setAnswers] = useState<string[]>(Array(TEACH_ME_QUESTIONS.length).fill(""));
+  const [answers, setAnswers] = useState<string[]>(Array(questions.length).fill(""));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<SegmentData | null>(null);
   const [resultId, setResultId] = useState<string | null>(null);
 
   const currentAnswer = answers[currentQ] || "";
-  const isLastQuestion = currentQ === TEACH_ME_QUESTIONS.length - 1;
+  const isLastQuestion = currentQ === questions.length - 1;
   const canProceed = currentAnswer.trim().length > 0;
 
   function handleAnswer(val: string) {
@@ -72,11 +76,11 @@ export default function TeachMeMode({ onBack }: { onBack: () => void }) {
         body: JSON.stringify({ anonId, mode: "teachme", conversation: { qas }, locale }),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.error || "Something went wrong."); return; }
+      if (!res.ok) { setError(data.error || t("errorGeneric")); return; }
       setResult(data.result);
       setResultId(data.id || null);
     } catch {
-      setError("Network error. Please try again.");
+      setError(t("errorNetwork"));
     } finally {
       setLoading(false);
     }
@@ -88,7 +92,7 @@ export default function TeachMeMode({ onBack }: { onBack: () => void }) {
         result={result}
         resultId={resultId}
         meta={{ rowCount: 0, columnCount: 0 }}
-        metaLabel="Based on your guided consultation answers"
+        metaLabel={t("metaLabel")}
         onStartOver={onBack}
         onReanalyze={handleAnalyze}
         loading={loading}
@@ -104,16 +108,16 @@ export default function TeachMeMode({ onBack }: { onBack: () => void }) {
           🤖
         </div>
         <h1 className="mb-1 text-2xl font-bold text-zinc-900 dark:text-zinc-50">
-          Your AI Consultant
+          {t("title")}
         </h1>
         <p className="text-zinc-500 dark:text-zinc-400">
-          {TEACH_ME_QUESTIONS.length} questions about your customers. Takes about 2 minutes.
+          {t("subtitle", { count: questions.length })}
         </p>
       </div>
 
       {/* Progress dots */}
       <div className="mb-8 flex items-center justify-center gap-2">
-        {TEACH_ME_QUESTIONS.map((_, i) => (
+        {questions.map((_, i) => (
           <button
             key={i}
             onClick={() => answers[i] && setCurrentQ(i)}
@@ -126,7 +130,7 @@ export default function TeachMeMode({ onBack }: { onBack: () => void }) {
       <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
         {/* Question counter */}
         <div className="mb-3 text-xs font-semibold uppercase tracking-wide text-blue-500">
-          Question {currentQ + 1} of {TEACH_ME_QUESTIONS.length}
+          {t("questionCounter", { current: currentQ + 1, total: questions.length })}
         </div>
 
         {/* AI avatar + question */}
@@ -135,7 +139,7 @@ export default function TeachMeMode({ onBack }: { onBack: () => void }) {
             AI
           </div>
           <p className="text-base font-medium leading-relaxed text-zinc-800 dark:text-zinc-100">
-            {TEACH_ME_QUESTIONS[currentQ]}
+            {questions[currentQ]}
           </p>
         </div>
 
@@ -145,7 +149,7 @@ export default function TeachMeMode({ onBack }: { onBack: () => void }) {
             key={currentQ}
             value={currentAnswer}
             onChange={(e) => handleAnswer(e.target.value)}
-            placeholder="Type your answer here..."
+            placeholder={t("placeholder")}
             rows={4}
             autoFocus
             className="flex-1 rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm leading-relaxed text-zinc-900 placeholder-zinc-400 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
@@ -158,7 +162,7 @@ export default function TeachMeMode({ onBack }: { onBack: () => void }) {
           <VoiceInput onTranscript={(t) => handleAnswer(currentAnswer + (currentAnswer ? " " : "") + t)} className="mt-1" />
         </div>
         <p className="mt-1 text-right text-xs text-zinc-400">
-          {canProceed ? "⌘/Ctrl+Enter to continue" : ""}
+          {canProceed ? t("shortcut") : ""}
         </p>
       </div>
 
@@ -166,7 +170,7 @@ export default function TeachMeMode({ onBack }: { onBack: () => void }) {
       {currentQ > 0 && (
         <div className="mt-4 rounded-xl border border-zinc-100 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/50">
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
-            Your answers so far
+            {t("answersSoFar")}
           </p>
           <div className="space-y-2">
             {answers.slice(0, currentQ).map((ans, i) =>
@@ -191,7 +195,7 @@ export default function TeachMeMode({ onBack }: { onBack: () => void }) {
           onClick={handleBack}
           className="rounded-lg border border-zinc-300 px-5 py-3 text-sm font-medium text-zinc-600 dark:border-zinc-600 dark:text-zinc-300"
         >
-          Back
+          {t("back")}
         </button>
         <button
           onClick={handleNext}
@@ -199,11 +203,11 @@ export default function TeachMeMode({ onBack }: { onBack: () => void }) {
           className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white disabled:opacity-40"
         >
           {loading ? (
-            <><span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />Building your segments...</>
+            <><span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />{t("building")}</>
           ) : isLastQuestion ? (
-            "Generate my segments →"
+            t("generateBtn")
           ) : (
-            "Next question →"
+            t("nextBtn")
           )}
         </button>
       </div>

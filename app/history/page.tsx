@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import HistoryView from "@/components/HistoryView";
-import AuthButton from "@/components/AuthButtonWrapper";
-import LanguageToggle from "@/components/LanguageToggle";
+import NavBar from "@/components/NavBar";
 
 export const metadata: Metadata = {
   title: "Your History — AI4SMB Insights",
@@ -11,19 +10,7 @@ export const metadata: Metadata = {
 export default function HistoryPage() {
   return (
     <main className="min-h-screen bg-zinc-50 dark:bg-black">
-      <div className="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
-        <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
-          <a href="/" className="text-sm font-bold text-zinc-900 dark:text-zinc-50">
-            AI4SMB Insights
-          </a>
-          <div className="flex items-center gap-3">
-            <a href="/segment" className="text-xs text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200">Segments</a>
-            <a href="/generate" className="text-xs text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200">Campaigns</a>
-            <LanguageToggle />
-            <AuthButton />
-          </div>
-        </div>
-      </div>
+      <NavBar />
       <HistoryView />
     </main>
   );

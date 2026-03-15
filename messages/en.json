@@ -299,7 +299,7 @@
     "promptTitle": "How was your experience?",
     "ratingLabel": "Tap to rate",
     "textPlaceholder": "Tell us what you think",
-    "textInputPlaceholder": "What did you find most useful?",
+    "textInputPlaceholder": "e.g. I used the campaign generator and it helped me reach more customers in my area.",
     "wordsMin": "words min",
     "namePlaceholder": "e.g. Jane Smith, Sunny Cafe, or a future business name",
     "locationLabel": "Your location",

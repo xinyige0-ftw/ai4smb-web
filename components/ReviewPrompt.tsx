@@ -68,6 +68,8 @@ export default function ReviewPrompt({
   const [consentContact, setConsentContact] = useState(false);
 
   const maxChars = 500;
+  const minWords = 10;
+  const wordCount = text.trim().split(/\s+/).filter(Boolean).length;
 
   function handleSubmit() {
     onSubmit({
@@ -228,18 +230,21 @@ export default function ReviewPrompt({
         {/* Review text */}
         <div className="mb-4">
           <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-            {t("textPlaceholder")}
+            {t("textPlaceholder")} <span className="text-red-500">*</span>
           </label>
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value.slice(0, maxChars))}
             rows={3}
-            className="w-full resize-none rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 outline-none transition-colors focus:border-blue-400 focus:ring-1 focus:ring-blue-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder-zinc-500"
+            className={`w-full resize-none rounded-xl border bg-white px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 outline-none transition-colors focus:border-blue-400 focus:ring-1 focus:ring-blue-400 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder-zinc-500 ${text.trim() && wordCount < minWords ? "border-red-300 dark:border-red-700" : !text.trim() ? "border-red-300 dark:border-red-700" : "border-zinc-200 dark:border-zinc-700"}`}
             placeholder={t("textInputPlaceholder")}
           />
-          <p className="mt-1 text-right text-xs text-zinc-400 dark:text-zinc-500">
-            {text.length}/{maxChars}
-          </p>
+          <div className="mt-1 flex justify-between text-xs text-zinc-400 dark:text-zinc-500">
+            <span className={wordCount > 0 && wordCount < minWords ? "text-red-500" : ""}>
+              {wordCount}/{minWords} {t("wordsMin")}
+            </span>
+            <span>{text.length}/{maxChars}</span>
+          </div>
         </div>
 
         {/* Location (required) */}
@@ -311,7 +316,7 @@ export default function ReviewPrompt({
         </div>
 
         <button
-          disabled={rating === 0 || !reviewLocation.trim() || !displayName.trim() || !email.trim()}
+          disabled={rating === 0 || !reviewLocation.trim() || !displayName.trim() || !email.trim() || wordCount < minWords}
           onClick={handleSubmit}
           className="w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
         >

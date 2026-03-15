@@ -298,8 +298,9 @@
   "review": {
     "promptTitle": "How was your experience?",
     "ratingLabel": "Tap to rate",
-    "textPlaceholder": "Tell us what you think (optional)",
+    "textPlaceholder": "Tell us what you think",
     "textInputPlaceholder": "What did you find most useful?",
+    "wordsMin": "words min",
     "namePlaceholder": "e.g. Jane Smith, Sunny Cafe, or a future business name",
     "locationLabel": "Your location",
     "locationPlaceholder": "City or region, e.g. San Francisco, CA",

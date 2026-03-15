@@ -298,8 +298,9 @@
   "review": {
     "promptTitle": "体验怎么样？",
     "ratingLabel": "点击评分",
-    "textPlaceholder": "说说你的想法（可选）",
+    "textPlaceholder": "说说你的想法",
     "textInputPlaceholder": "你觉得最有用的是什么？",
+    "wordsMin": "词以上",
     "namePlaceholder": "比如 张三、阳光咖啡馆、或你未来的店名",
     "locationLabel": "你的位置",
     "locationPlaceholder": "城市或地区，比如 San Francisco, CA",

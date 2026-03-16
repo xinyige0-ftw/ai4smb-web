@@ -129,6 +129,9 @@ export default function SignInModal({ onClose }: SignInModalProps) {
             <p className="text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">
               {t.rich("magicLinkSent", { email, strong: (chunks) => <strong>{chunks}</strong> })}
             </p>
+            <p className="mt-3 text-xs leading-relaxed text-zinc-400 dark:text-zinc-500">
+              {t("checkSpam")}
+            </p>
             <button
               onClick={onClose}
               className="mt-6 text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400"

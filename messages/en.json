@@ -236,6 +236,7 @@
     "noPassword": "No password needed · Your data stays private",
     "checkInbox": "Check your inbox",
     "magicLinkSent": "We sent a magic link to <strong>{email}</strong>. Click the link to sign in.",
+    "checkSpam": "Don't see it? Check your spam or junk folder. Hotmail and Outlook may take a few minutes.",
     "gotIt": "Got it, close this",
     "skipForNow": "Continue without signing in"
   },

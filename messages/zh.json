@@ -236,6 +236,7 @@
     "noPassword": "无需密码 · 你的数据保持私密",
     "checkInbox": "去查看邮箱",
     "magicLinkSent": "我们发了一封登录邮件到 <strong>{email}</strong>，点邮件里的链接就能登录。",
+    "checkSpam": "没收到？请检查垃圾邮件文件夹。Hotmail 和 Outlook 邮箱可能需要几分钟。",
     "gotIt": "知道了，关闭",
     "skipForNow": "先不登录，继续使用"
   },

@@ -59,8 +59,8 @@
     "bottomCtaTitle": "今天就免费开始。",
     "bottomCtaDesc": "已有数千名小企业主在用AI4SMB找到最佳客户、写出更好的营销内容。免费、快速，不到两分钟。",
     "footerDesc": "面向小企业的免费AI营销工具。",
-    "testimonialTitle": "其他老板怎么说",
-    "testimonialEmpty": "成为第一个分享体验的人！"
+    "testimonialLabel": "用户评价",
+    "testimonialTitle": "其他老板怎么说"
   },
   "segment": {
     "pageTitle": "了解你的客户",

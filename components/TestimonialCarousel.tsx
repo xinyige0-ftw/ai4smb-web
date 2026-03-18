@@ -1,15 +1,53 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { useTranslations } from "next-intl";
 
-interface Review {
+interface Testimonial {
   id: string;
-  rating: number;
   text: string;
-  display_name: string;
-  business_type: string;
+  author: string;
+  role: string;
+  rating: number;
 }
+
+const TESTIMONIALS: Testimonial[] = [
+  {
+    id: "1",
+    author: "E.H.",
+    role: "Aspiring café owner, San Francisco",
+    rating: 5,
+    text: "I used the Benchmark mode to see if my neighborhood even needed another coffee shop. It showed me a gap in \"early morning commuters\" that none of the other shops are targeting well. I used the Campaign Generator to draft what my first month of ads would look like. It finally feels real.",
+  },
+  {
+    id: "2",
+    author: "X.Z.",
+    role: "Gym owner, San Francisco",
+    rating: 5,
+    text: "As a small business without a dedicated marketing team, it makes targeting the right customers much easier. The platform helps us reach local people interested in fitness and group classes. We've used it to promote free trial classes and membership discounts — the setup is simple and intuitive.",
+  },
+  {
+    id: "3",
+    author: "Anonymous",
+    role: "Aspiring photographer, Burlingame",
+    rating: 5,
+    text: "I've been using the Teach-Me consultation flow, and it's like taking a business masterclass while you work. The follow-up suggestions always make me think about my future business from an angle I never considered. It's given me the confidence to actually set a launch date.",
+  },
+  {
+    id: "4",
+    author: "Raghav",
+    role: "Hair products, San Francisco",
+    rating: 5,
+    text: "I honestly didn't expect much when I first tried the campaign generation tool, but wow, I was wrong! The AI actually understood what I was going for. The image it generated looked like something a professional creative agency would produce. It's rare to find a tool that just works right out of the box.",
+  },
+  {
+    id: "5",
+    author: "K.C.",
+    role: "Pre-launch business, San Francisco",
+    rating: 5,
+    text: "Starting a business is overwhelming, but the action plan feature makes it manageable. It tells me exactly what to do each day — post this, email that, check this. I just copy the generated copy and I'm done. It's the only way I've stayed consistent while still in the pre-launch phase.",
+  },
+];
 
 function Stars({ count }: { count: number }) {
   return (
@@ -49,29 +87,17 @@ function ArrowButton({ direction, onClick }: { direction: "left" | "right"; onCl
 }
 
 export default function TestimonialCarousel() {
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [loading, setLoading] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
   const t = useTranslations("landing");
 
-  useEffect(() => {
-    fetch("/api/reviews")
-      .then((res) => (res.ok ? res.json() : []))
-      .then((data: Review[]) => setReviews(data.slice(0, 10)))
-      .catch(() => setReviews([]))
-      .finally(() => setLoading(false));
-  }, []);
-
   function scroll(direction: "left" | "right") {
     if (!scrollRef.current) return;
-    const amount = 300;
+    const amount = 320;
     scrollRef.current.scrollBy({
       left: direction === "left" ? -amount : amount,
       behavior: "smooth",
     });
   }
-
-  if (loading) return null;
 
   return (
     <section className="border-y border-zinc-100 bg-zinc-50 px-4 py-16 dark:border-zinc-800 dark:bg-zinc-950">
@@ -79,62 +105,49 @@ export default function TestimonialCarousel() {
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h2 className="mb-1 text-xs font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
-              Testimonials
+              {t("testimonialLabel")}
             </h2>
             <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
               {t("testimonialTitle")}
             </p>
           </div>
-          {reviews.length > 0 && (
-            <div className="hidden gap-2 sm:flex">
-              <ArrowButton direction="left" onClick={() => scroll("left")} />
-              <ArrowButton direction="right" onClick={() => scroll("right")} />
-            </div>
-          )}
+          <div className="hidden gap-2 sm:flex">
+            <ArrowButton direction="left" onClick={() => scroll("left")} />
+            <ArrowButton direction="right" onClick={() => scroll("right")} />
+          </div>
         </div>
 
-        {reviews.length === 0 ? (
-          <p className="py-8 text-center text-sm text-zinc-400 dark:text-zinc-500">
-            {t("testimonialEmpty")}
-          </p>
-        ) : (
-          <div className="relative">
-            <div
-              ref={scrollRef}
-              className="scrollbar-hide flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2"
-              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-            >
-              {reviews.map((review) => (
-                <div
-                  key={review.id}
-                  className="w-72 shrink-0 snap-start rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-700 dark:bg-zinc-900"
-                >
-                  <Stars count={review.rating} />
-                  {review.text && (
-                    <p className="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-                      &ldquo;{review.text.length > 150 ? review.text.slice(0, 150) + "..." : review.text}&rdquo;
-                    </p>
-                  )}
-                  <div className="mt-4 flex items-center justify-between">
-                    <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
-                      {review.display_name || "Anonymous"}
-                    </span>
-                    {review.business_type && (
-                      <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-950 dark:text-blue-300">
-                        {review.business_type}
-                      </span>
-                    )}
-                  </div>
+        <div className="relative">
+          <div
+            ref={scrollRef}
+            className="scrollbar-hide flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          >
+            {TESTIMONIALS.map((review) => (
+              <div
+                key={review.id}
+                className="w-80 shrink-0 snap-start rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-700 dark:bg-zinc-900"
+              >
+                <Stars count={review.rating} />
+                <p className="mt-3 line-clamp-5 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+                  &ldquo;{review.text}&rdquo;
+                </p>
+                <div className="mt-4 border-t border-zinc-100 pt-3 dark:border-zinc-800">
+                  <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">
+                    {review.author}
+                  </p>
+                  <p className="text-xs text-zinc-400 dark:text-zinc-500">
+                    {review.role}
+                  </p>
                 </div>
-              ))}
-            </div>
-            {/* Mobile arrows */}
-            <div className="mt-4 flex justify-center gap-2 sm:hidden">
-              <ArrowButton direction="left" onClick={() => scroll("left")} />
-              <ArrowButton direction="right" onClick={() => scroll("right")} />
-            </div>
+              </div>
+            ))}
           </div>
-        )}
+          <div className="mt-4 flex justify-center gap-2 sm:hidden">
+            <ArrowButton direction="left" onClick={() => scroll("left")} />
+            <ArrowButton direction="right" onClick={() => scroll("right")} />
+          </div>
+        </div>
       </div>
     </section>
   );

@@ -59,8 +59,8 @@
     "bottomCtaTitle": "Start for free today.",
     "bottomCtaDesc": "Thousands of small business owners are finding their best customers and writing better marketing with AI4SMB. It's free, it's fast, and it takes less than two minutes.",
     "footerDesc": "Free AI marketing tools for small businesses.",
-    "testimonialTitle": "What business owners are saying",
-    "testimonialEmpty": "Be the first to share your experience!"
+    "testimonialLabel": "Testimonials",
+    "testimonialTitle": "What business owners are saying"
   },
   "segment": {
     "pageTitle": "Understand Your Customers",

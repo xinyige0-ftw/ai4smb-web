@@ -1,8 +1,8 @@
-import Groq from "groq-sdk";
 import { buildSegmentPrompt, getSegmentSystemPrompt, type CsvSummary } from "@/lib/segment-prompts";
 import { getOrCreateSession, saveSegment, extractSessionMeta } from "@/lib/supabase";
 import { getUser } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { generateJSON, getDefaultProvider } from "@/lib/ai-provider";
 import {
   buildInterviewPrompt,
   buildBenchmarkPrompt,
@@ -14,8 +14,6 @@ import {
   type BenchmarkInput,
   type TeachMeConversation,
 } from "@/lib/insight-prompts";
-
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY || "" });
 
 export async function POST(req: Request) {
   try {
@@ -30,7 +28,7 @@ export async function POST(req: Request) {
 
     if (anonId && !checkRateLimit(anonId)) {
       return Response.json(
-        { error: "You've reached the limit of 10 analyses per hour. Please try again later." },
+        { error: "You've reached the limit of 30 analyses per hour. Please try again later." },
         { status: 429 }
       );
     }
@@ -110,18 +108,13 @@ export async function POST(req: Request) {
         return Response.json({ error: "Unknown mode" }, { status: 400 });
     }
 
-    const completion = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: prompt },
-      ],
-      temperature: 0.7,
-      max_tokens: 3000,
-      response_format: { type: "json_object" },
-    });
-
-    const text = completion.choices[0]?.message?.content || "{}";
+    const response = await generateJSON(
+      systemPrompt,
+      prompt,
+      { temperature: 0.7, maxTokens: 3000 },
+      getDefaultProvider()
+    );
+    const text = response.text || "{}";
     const result = JSON.parse(text);
 
     console.log("SEGMENT:", {

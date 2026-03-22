@@ -1,10 +1,8 @@
-import Groq from "groq-sdk";
 import { buildPrompt, getSystemPrompt, type GenerateInput } from "@/lib/prompts";
 import { getOrCreateSession, saveCampaign, extractSessionMeta } from "@/lib/supabase";
 import { getUser } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
-
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY || "" });
+import { generateJSON, getDefaultProvider } from "@/lib/ai-provider";
 
 export async function POST(req: Request) {
   try {
@@ -23,24 +21,19 @@ export async function POST(req: Request) {
 
     if (anonId && !checkRateLimit(anonId)) {
       return Response.json(
-        { error: "You've reached the limit of 10 generations per hour. Please try again later." },
+        { error: "You've reached the limit of 30 generations per hour. Please try again later." },
         { status: 429 }
       );
     }
 
     const prompt = buildPrompt(input, locale);
-    const completion = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
-      messages: [
-        { role: "system", content: getSystemPrompt(locale) },
-        { role: "user", content: prompt },
-      ],
-      temperature: 0.9,
-      max_tokens: 2048,
-      response_format: { type: "json_object" },
-    });
-
-    const text = completion.choices[0]?.message?.content || "{}";
+    const response = await generateJSON(
+      getSystemPrompt(locale),
+      prompt,
+      { temperature: 0.9, maxTokens: 2048 },
+      getDefaultProvider()
+    );
+    const text = response.text || "{}";
     const campaign = JSON.parse(text);
 
     console.log("GENERATE:", {

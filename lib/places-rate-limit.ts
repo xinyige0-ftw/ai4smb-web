@@ -1,4 +1,4 @@
-const MONTHLY_LIMIT = 500;
+const MONTHLY_LIMIT = 2000;
 
 let callCount = 0;
 let resetMonth = new Date().getMonth();

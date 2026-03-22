@@ -1,5 +1,5 @@
 const RATE_LIMIT_MAP = new Map<string, { count: number; resetAt: number }>();
-const MAX_PER_HOUR = 10;
+const MAX_PER_HOUR = 30;
 
 export function checkRateLimit(anonId: string): boolean {
   const now = Date.now();

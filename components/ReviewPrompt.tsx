@@ -57,7 +57,6 @@ export default function ReviewPrompt({
 }: ReviewPromptProps) {
   const t = useTranslations("review");
   const tb = useTranslations("businesses");
-  const hasUserInfo = !!(userEmail || userName);
   const [rating, setRating] = useState(0);
   const [reviewBusinessType, setReviewBusinessType] = useState(businessType);
   const [reviewLocation, setReviewLocation] = useState(location);

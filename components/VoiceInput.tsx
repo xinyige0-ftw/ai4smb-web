@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useMemo } from "react";
 import { useTranslations } from "next-intl";
 
 interface VoiceInputProps {
@@ -15,14 +15,13 @@ function getSR() {
 
 export default function VoiceInput({ onTranscript, className = "" }: VoiceInputProps) {
   const t = useTranslations("chat");
-  const [supported, setSupported] = useState(false);
+  const supported = useMemo(() => {
+    if (typeof window === "undefined") return false;
+    return !!getSR();
+  }, []);
   const [listening, setListening] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const recRef = useRef<any>(null);
-
-  useEffect(() => {
-    setSupported(!!getSR());
-  }, []);
 
   const toggle = useCallback(() => {
     if (listening) {

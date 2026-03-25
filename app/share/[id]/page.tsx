@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import type { Metadata } from "next";
 
 function getClient() {
@@ -51,9 +52,9 @@ export default async function SharePage({ params }: { params: Promise<{ id: stri
     <main className="min-h-screen bg-zinc-50 dark:bg-black">
       <nav className="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
         <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
-          <a href="/" className="text-sm font-bold text-zinc-900 dark:text-zinc-50">
+          <Link href="/" className="text-sm font-bold text-zinc-900 dark:text-zinc-50">
             AI4SMB Insights
-          </a>
+          </Link>
           <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900 dark:text-blue-300">
             Shared {type}
           </span>

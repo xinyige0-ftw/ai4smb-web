@@ -1,7 +1,5 @@
-import Groq from "groq-sdk";
 import { POST_AGENT_SYSTEM_PROMPT, buildFormatPrompt } from "@/lib/post-agent-prompts";
-
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY || "" });
+import { generateJSON, getDefaultProvider } from "@/lib/ai-provider";
 
 export async function POST(req: Request) {
   try {
@@ -19,18 +17,13 @@ export async function POST(req: Request) {
 
     const prompt = buildFormatPrompt(channelContent, platform, businessContext, locale);
 
-    const completion = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
-      messages: [
-        { role: "system", content: POST_AGENT_SYSTEM_PROMPT },
-        { role: "user", content: prompt },
-      ],
-      temperature: 0.7,
-      max_tokens: 2000,
-      response_format: { type: "json_object" },
-    });
-
-    const text = completion.choices[0]?.message?.content || "{}";
+    const response = await generateJSON(
+      POST_AGENT_SYSTEM_PROMPT,
+      prompt,
+      { temperature: 0.7, maxTokens: 2000 },
+      getDefaultProvider()
+    );
+    const text = response.text || "{}";
     const result = JSON.parse(text);
 
     return Response.json({ result });

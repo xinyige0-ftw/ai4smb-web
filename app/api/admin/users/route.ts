@@ -42,7 +42,7 @@ export async function GET() {
   }
 
   const sessionIds = (sessions ?? []).map((s) => s.id);
-  let reviewsMap: Record<string, { rating: number; nps_score: number | null; text: string; display_name: string; created_at: string }> = {};
+  const reviewsMap: Record<string, { rating: number; nps_score: number | null; text: string; display_name: string; created_at: string }> = {};
   if (sessionIds.length > 0) {
     const { data: reviews } = await db
       .from("reviews")

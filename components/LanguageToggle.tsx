@@ -1,25 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useCallback } from "react";
 
 const LOCALES = [
   { code: "en", label: "EN" },
   { code: "zh", label: "中文" },
 ];
 
+function readLocaleCookie(): string {
+  if (typeof document === "undefined") return "en";
+  const match = document.cookie.match(/(?:^|;\s*)locale=(\w+)/);
+  return match ? match[1] : "en";
+}
+
 export default function LanguageToggle() {
-  const [current, setCurrent] = useState("en");
+  const [current] = useState(readLocaleCookie);
 
-  useEffect(() => {
-    const match = document.cookie.match(/(?:^|;\s*)locale=(\w+)/);
-    if (match) setCurrent(match[1]);
-  }, []);
-
-  function switchLocale(locale: string) {
-    if (locale === current) return;
-    document.cookie = `locale=${locale};path=/;max-age=31536000;SameSite=Lax`;
-    window.location.reload();
-  }
+  const switchLocale = useCallback(
+    (locale: string) => {
+      if (locale === current) return;
+      globalThis.document.cookie = `locale=${locale};path=/;max-age=31536000;SameSite=Lax`;
+      window.location.reload();
+    },
+    [current]
+  );
 
   return (
     <div className="flex items-center gap-0.5 text-xs">

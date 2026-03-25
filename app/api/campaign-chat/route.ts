@@ -1,9 +1,7 @@
-import Groq from "groq-sdk";
 import { getChatSystemPrompt } from "@/lib/campaign-chat-prompts";
 import { getUser } from "@/lib/auth";
 import { getOrCreateSession, extractSessionMeta } from "@/lib/supabase";
-
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY || "" });
+import { generateChat, getDefaultProvider } from "@/lib/ai-provider";
 
 export async function POST(req: Request) {
   try {
@@ -29,14 +27,13 @@ export async function POST(req: Request) {
       getOrCreateSession(anonId, userId, meta).catch(() => {});
     }
 
-    const completion = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
-      messages: [{ role: "system", content: getChatSystemPrompt(locale) }, ...messages],
-      temperature: 0.8,
-      max_tokens: 3000,
-    });
-
-    const text = completion.choices[0]?.message?.content || "";
+    const response = await generateChat(
+      getChatSystemPrompt(locale),
+      messages,
+      { temperature: 0.8, maxTokens: 3000 },
+      getDefaultProvider()
+    );
+    const text = response.text || "";
 
     return Response.json({ message: text });
   } catch (err) {

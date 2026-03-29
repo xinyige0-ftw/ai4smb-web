@@ -77,7 +77,9 @@ export async function POST(req: Request) {
         .from("sessions")
         .select("id")
         .eq("anon_id", anonId)
-        .single();
+        .order("last_seen_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
       sessionId = session?.id ?? null;
     }
 

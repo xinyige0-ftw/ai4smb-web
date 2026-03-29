@@ -1,4 +1,4 @@
--- Migration: unified activity tracking
+tal -- Migration: unified activity tracking
 -- Adds chats table, activity_log view, and counters for all action types
 -- Run in Supabase Dashboard → SQL Editor
 
@@ -74,6 +74,7 @@ select
   (select count(*) from campaigns) as total_campaigns,
   (select count(*) from segments) as total_segments,
   (select count(*) from chats) as total_chats,
+  (select count(*) from reviews) as total_reviews,
   (select coalesce(sum(format_posts_count), 0) from sessions) as total_format_posts,
   (select coalesce(sum(imagine_count), 0) from sessions) as total_image_generations,
   (select count(*) from campaigns)
